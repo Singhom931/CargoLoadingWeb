@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reference</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            color: black;
+            position: relative;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        .reference-container {
+            z-index: 1; /* Ensure form is above the iframe */
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(15px);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            outline: none;
+        }
+
+        button {
+            width: 90%;
+            padding: 15px;
+            margin: 20px 0;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #e0109b, #c316da, #e0109b);
+        }
+
+        #playBtn {
+            position: absolute;
+            top: -2vh;
+            left: 175vb;
+            width: 30vb;
+            background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #playBtn:hover {
+            background: linear-gradient(90deg, #e0109b, #c316da, #e0109b);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div class="reference-container">
+        <h1>Open or Create</h1>
+        <form id="refForm" method="POST" style="text-align: center;">
+            <input 
+                type="text" 
+                id="ref-name"
+                name="ref-name" 
+                required 
+                placeholder="Enter Reference Name" 
+                style="width: 90%; padding: 15px; margin: 10px 0; font-size: 1.2em; border-radius: 5px; border: 1px solid #ccc;"
+            >
+            <br>
+            <button 
+                type="submit" 
+                style="width: 100%; padding: 15px; font-size: 1.2em; background-color: #333399; color: white; border: none; border-radius: 5px; cursor: pointer;"
+            >
+                Submit
+            </button>
+        </form>
+    </div>
+
+    <button id="playBtn">Play</button>
+
+   <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Sprites
+        const playerImg = new Image();
+        playerImg.src = "{{ url_for('static', filename='resources/spaceship.png') }}";
+
+        const enemyImg = new Image();
+        enemyImg.src = "{{ url_for('static', filename='resources/enemy.png') }}";
+
+        // Player
+        const player = { x: canvas.width / 2 - 25, y: canvas.height - 60, width: 50, height: 50, speed: 14 };
+
+        // Game settings
+        let bullets = [];
+        let enemy_bullets = [];
+        let enemies = [];
+        let enemy_moving = 1
+        let move_cycle = -40
+        let move_down = false
+        let isPlaying = false;
+        let random_shot = 0.01
+        const bulletSpeed = 10;
+        const enemySpeed = 10;
+        let autogun = 0
+        let score = 0
+
+        // Initialize enemies
+        function createEnemies() {
+            enemy_moving = 1
+            move_cycle = -40
+            move_down = false
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 10; col++) {
+                    enemies.push({
+                        x: col * 60 + 50,
+                        y: row * 60 + 30,
+                        width: 40,
+                        height: 40
+                    });
+                }
+            }
+        }
+
+        // Draw functions
+        function drawPlayer() {
+            ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+        }
+
+        function drawEnemies() {
+            enemies.forEach(enemy => {
+                ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
+            });
+        }
+
+        function drawBullets() {
+            ctx.fillStyle = 'purple';
+            bullets.forEach(bullet => {
+                ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            });
+            ctx.fillStyle = 'red';
+            enemy_bullets.forEach(bullet => {
+                ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            });
+
+        }
+
+        function drawScore() {
+            ctx.fillStyle = "#000";
+            ctx.font = "24px Arial";
+            ctx.fillText("Score: " + score, 20, 30);
+        }
+
+        // Game logic
+        function moveBullets() {
+            bullets.forEach(bullet => bullet.y -= bulletSpeed);
+            enemy_bullets.forEach(bullet => bullet.y += bulletSpeed);
+            bullets.forEach((bullet,bIndex) => {
+                enemies.forEach((enemy, eIndex) => {
+                    if (
+                        bullet.x < enemy.x + enemy.width &&
+                        bullet.x + bullet.width > enemy.x &&
+                        bullet.y < enemy.y + enemy.height &&
+                        bullet.y + bullet.height > enemy.y
+                    ) {
+                        enemies.splice(eIndex, 1);
+                        bullets.splice(bIndex, 1);
+                        score++
+                    }
+                });
+            });
+            bullets = bullets.filter(bullet => bullet.y > 0);
+        }
+
+        function moveEnemies() {
+            if(move_cycle>40 || move_cycle<-40){move_down=true}
+            enemies.forEach(enemy => (enemy.x += enemy_moving*enemySpeed));
+            if(move_down===true){enemies.forEach(enemy => (enemy.y += enemySpeed));
+            enemy_moving = enemy_moving*-1; move_down=false}//move_cycle = 40*enemy_moving*-1}
+            move_cycle += enemy_moving
+
+            enemies.forEach(enemy => {
+                rand = Math.random();
+                if(rand<random_shot){
+                    enemy_bullets.push({
+                    x: enemy.x + enemy.width / 2 + 2.5,
+                    y: enemy.y,
+                    width: 5,
+                    height: 10
+                    })
+            }})
+            autogun += 1
+            if(!isPlaying && autogun>5){
+                autogun = 0
+                bullets.push({
+                    x: player.x + player.width / 2 - 2.5,
+                    y: player.y,
+                    width: 5,
+                    height: 10
+                });
+            }
+        }
+
+        function resetGame() {
+            score = 0
+            bullets.length = 0;
+            enemies.length = 0;
+            createEnemies();
+        }
+
+        // Game loop
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawEnemies();
+            drawBullets();
+            drawScore();
+            moveBullets();
+            moveEnemies();
+            if(enemies.length===0){resetGame();}
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Controls
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft' && player.x > 0) player.x -= player.speed;
+            if (e.key === 'ArrowRight' && player.x < canvas.width - player.width) player.x += player.speed;
+            });
+        document.addEventListener('keyup', e => {
+            if (e.key === ' ') {
+                bullets.push({
+                    x: player.x + player.width / 2 - 2.5,
+                    y: player.y,
+                    width: 5,
+                    height: 10
+                });
+            }
+        });
+
+        /*document.getElementById('playBtn').addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                resetGame();
+                
+            }
+        });*/
+
+        document.getElementById("playBtn").addEventListener("click", function() {
+            if (!isPlaying) {
+                isPlaying = true;
+                random_shot = 0.001;
+                document.getElementById("playBtn").textContent = "Stop";
+                document.querySelector(".reference-container").style.display = "none";
+                resetGame();
+            } else {
+                isPlaying = false;
+                random_shot = 0.01;
+                document.getElementById("playBtn").textContent = "Play";
+                document.querySelector(".reference-container").style.display = "block";
+                resetGame();
+            }
+        });
+
+
+        gameLoop();
+
+        // Initial enemy creation
+        createEnemies();
+    </script>
+   
+</body>
+</html>

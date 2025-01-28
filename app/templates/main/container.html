@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Container List</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/js/particles/ParticleSystem.js"></script>
+    <style>
+      /* General Reset */
+      body, html {
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+        /*background-color: #f4f4f9;*/
+        color: #333;
+        height: 100%;
+        overflow-x: hidden;
+    }
+
+    h2 {
+        display: inline-block;
+        margin: 20px auto;
+        text-align: center;
+        font-family: 'Arial', sans-serif;
+        font-size: 2.0rem;
+        font-weight: bold;
+        color: white;
+        background: linear-gradient(90deg, #6a11cb, #1c5dcb, #6a11cb);
+        padding: 10px 25px;
+        border-radius: 10px;
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        animation: glow 3s infinite;
+    }
+
+    
+
+    table {
+        /*background:  linear-gradient(90deg, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d);
+        */
+        background:  linear-gradient(0deg, #90276d, #54096d, #90276d);
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 auto;
+        table-layout: fixed; /* Ensures fixed column layout */
+        background-color: #fff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        /*z-index: 1;*/
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        word-wrap: break-word; /* Prevents long words from overflowing */
+    }
+
+    th {
+        /*background:  linear-gradient(90deg, #c316da, #e0109b, #bd1df2);/*#4CAF50;*/
+        color: white;
+        font-size: 1.1rem;
+    }
+
+    td {
+        background-color: #f9f9f9;
+        font-size: 1rem;
+    }
+
+    tr:hover td {
+        background-color: #f1f1f1;
+    }
+
+    .delete-btn {
+        cursor: pointer;
+        color: red;
+    }
+
+    input[type="text"], input[type="color"] {
+        width: 100%; /* Allow inputs to stretch within their column */
+        box-sizing: border-box; /* Prevents input from overflowing */
+    }
+
+    /* Fix Table Layout */
+    table {
+        width: 100%;
+        display: table;  /* Ensure it's a table, not a grid */
+    }
+
+    th:nth-child(1), td:nth-child(1) { width: 13.25vw; }
+    th:nth-child(2), td:nth-child(2) { width: 13.25vw; }
+    th:nth-child(3), td:nth-child(3) { width: 13.25vw; }
+    th:nth-child(4), td:nth-child(4) { width: 13.25vw; }
+    th:nth-child(5), td:nth-child(5) { width: 13.25vw; }
+    th:nth-child(6), td:nth-child(6) { width: 13.25vw; }
+    /*th:nth-child(7), td:nth-child(7) { width: 10vw; }*/
+
+    /* Ensure delete button has proper alignment */
+    .delete-btn {
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: red;
+    }
+
+    @media (max-width: 768px) {
+        table {
+            grid-template-columns: repeat(6, 1fr); /* Make the table more compact on small screens */
+        }
+        th, td {
+            font-size: 0.9rem;
+        }
+    }
+
+    button {
+      width: 90%;
+      padding: 15px;
+      margin: 20px 0;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+      color: white;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+        background: linear-gradient(90deg, #e0109b, #c316da, #e0109b);
+    }
+
+    #playBtn {
+        position: absolute;
+        top: -2vh;
+        left: 175vb;
+        width: 30vb;
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #backBtn {
+      position: absolute;
+      bottom: -2vh;
+      left: 140vb;
+      width: 30vb;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+  }
+
+    #nextBtn {
+        position: absolute;
+        bottom: -2vh;
+        left: 175vb;
+        width: 30vb;
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #addBtn {
+        position: relative;
+        top: -2vh;
+        /*left: 175vb;*/
+        width: 35vb;
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #webgl-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
+    #container-form {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        /*z-index: -1;*/
+    }
+    #container-form input, #container-form select, #container-form button {
+        margin-bottom: 10px;
+        padding: 5px;
+    }
+    </style>
+  </head>
+  <body onload="addRow()">
+    <h2 id="containertitle">Container List</h2>
+
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- container form for user input -->
+<div id="container-form">
+  <label for="container-name">Container Name:</label>
+  <input type="text" id="container-name" placeholder="Enter Container name"><br>
+
+  <label for="container-length">Length (cm):</label>
+  <input type="number" id="container-length" value="1"><br>
+
+  <label for="container-width">Width (cm):</label>
+  <input type="number" id="container-width" value="1"><br>
+
+  <label for="container-height">Height (cm):</label>
+  <input type="number" id="container-height" value="1"><br>
+
+  <label for="container-weight">Weight (kg):</label>
+  <input type="number" id="container-weight-capacity" value="1"><br>
+
+  <button id="add-container">Add container</button>
+</div>
+
+
+    <table id="containerTable" border="2">
+      <thead>
+        <tr>
+          <th>Container Name</th>
+          <th>Length (cm)</th>
+          <th>Width (cm)</th>
+          <th>Height (cm)</th>
+          <th>Volume (cm³)</th>
+          <th>Weight Capacity (kg)</th>
+          <th>‎ ‎ ‎ Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Rows will be added here dynamically -->
+      </tbody>
+    </table>
+
+    <button id="addBtn" onclick="addRow()">Add New Container</button>
+
+    <button id="backBtn" onclick="window.history.back()">Back</button>
+
+    <button type="submit" id="nextBtn" onclick="window.location.href='load_output';submitContainer()">Next</button>
+
+    <button id="playBtn">Play</button>
+
+    <!-- <script src="{{ url_for('static', filename='container.js') }}"></script> -->
+    <script src="{{ url_for('static', filename='container3d.js') }}"></script>
+
+    <script type="text/javascript">
+      // Pass the existing_reference value from Flask into JavaScript
+
+      const existingReference = {{ existing_reference | tojson }};
+
+      // Now you can use the `existingReference` variable in JavaScript
+      if (existingReference) {
+          console.log("Reference exists: ", existingReference);
+          fetchContainerData()
+          // Perform any logic if the reference exists
+      } else {
+          console.log("No existing reference found.");
+      }
+    </script>
+  </body>
+</html>

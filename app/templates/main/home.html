@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cargo & Container Loading</title>
+    <!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+            
+        }
+
+        .hero-section {
+            position: relative;
+            height: 100vh;
+            color: white;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /*.cta-button {
+            /*background-color: #28a745;
+            color: white;
+            /*padding: 15px 35px;
+            font-size: 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transform: translate(-50%, -50%);
+        }*/
+
+        .cta-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.5);
+        }
+
+        h1 {
+            font-size: 3rem;
+            animation: fadeIn 2s ease forwards;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Black border effect */
+        }
+        
+        p {
+            font-size: 1.5rem;
+            margin-top: 15px;
+            animation: fadeIn 2.5s ease forwards;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); /* Subtle black border for the paragraph */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-section {
+            position: relative; /* Make sure it layers above the 3D background */
+            z-index: 1;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.95);;
+            color: #333;
+            overflow-y: auto; /* Allow scrolling */
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .threeD-ocean-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Background behind the text */
+            pointer-events: none; /* Allow clicks through to the content */
+        }
+
+        .content-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .content-header h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .content-header p {
+            font-size: 1.2rem;
+            color: #555;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .feature-card {
+            flex: 1 1 calc(30% - 20px);
+            margin: 10px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            /*box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);*/
+        }
+
+        .feature-card i {
+            font-size: 2.5rem;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h4 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+            /*text-shadow: 0px 0px 80px rgba(40, 167, 69, 0.7);*/
+        }
+
+        .feature-card p {
+            font-size: 1.3rem;
+            color: #444444;
+            
+        }
+
+        .call-to-action {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .call-to-action a {
+            text-decoration: none;
+            background: #4087b2;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .call-to-action a:hover {
+            background: #2e6181;
+        }
+
+        /* Rainbow Text Effect */
+        .rainbow-text {
+            font-size: 1.5rem; /* Adjust font size as needed */
+            font-weight: bold;
+            text-decoration: none;
+            color: #fff; /* White base color */
+            display: inline-block;
+            position: relative;
+            animation: rainbow-flow 3s linear infinite;
+        }
+        
+        /* Animation for flowing colors using text-shadow */
+        @keyframes rainbow-flow {
+            0% {
+                text-shadow:
+                    0 0 2px rgba(255, 0, 0, 0.8), /* Red */
+                    0 0 4px rgba(255, 0, 0, 0.8),
+                    0 0 6px rgba(255, 0, 0, 0.8),
+                    0 0 8px rgba(255, 0, 0, 0.8);
+            }
+            14% {
+                text-shadow:
+                    0 0 2px rgba(255, 127, 0, 0.8), /* Orange */
+                    0 0 4px rgba(255, 127, 0, 0.8),
+                    0 0 6px rgba(255, 127, 0, 0.8),
+                    0 0 8px rgba(255, 127, 0, 0.8);
+            }
+            28% {
+                text-shadow:
+                    0 0 2px rgba(255, 255, 0, 0.8), /* Yellow */
+                    0 0 4px rgba(255, 255, 0, 0.8),
+                    0 0 6px rgba(255, 255, 0, 0.8),
+                    0 0 8px rgba(255, 255, 0, 0.8);
+            }
+            42% {
+                text-shadow:
+                    0 0 2px rgba(0, 255, 0, 0.8), /* Green */
+                    0 0 4px rgba(0, 255, 0, 0.8),
+                    0 0 6px rgba(0, 255, 0, 0.8),
+                    0 0 8px rgba(0, 255, 0, 0.8);
+            }
+            57% {
+                text-shadow:
+                    0 0 2px rgba(0, 0, 255, 0.8), /* Blue */
+                    0 0 4px rgba(0, 0, 255, 0.8),
+                    0 0 6px rgba(0, 0, 255, 0.8),
+                    0 0 8px rgba(0, 0, 255, 0.8);
+            }
+            71% {
+                text-shadow:
+                    0 0 2px rgba(75, 0, 130, 0.8), /* Indigo */
+                    0 0 4px rgba(75, 0, 130, 0.8),
+                    0 0 6px rgba(75, 0, 130, 0.8),
+                    0 0 8px rgba(75, 0, 130, 0.8);
+            }
+            85% {
+                text-shadow:
+                    0 0 2px rgba(238, 130, 238, 0.8), /* Violet */
+                    0 0 4px rgba(238, 130, 238, 0.8),
+                    0 0 6px rgba(238, 130, 238, 0.8),
+                    0 0 8px rgba(238, 130, 238, 0.8);
+            }
+            100% {
+                text-shadow:
+                    0 0 2px rgba(255, 0, 0, 0.8), /* Red */
+                    0 0 4px rgba(255, 0, 0, 0.8),
+                    0 0 6px rgba(255, 0, 0, 0.8),
+                    0 0 8px rgba(255, 0, 0, 0.8);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .feature-card {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div id="hero-background"></div>
+        <div class="container" id="content">
+            <h1 class="display-4">Efficient Cargo & Container Loading</h1>
+            <p class="lead">Optimize your logistics and manage cargo packing efficiently with our smart tools.</p>
+            <!-- <a href="auth/login" class="cta-button" id="start-button">Start Packing</a> -->
+             <a href="auth/login" class="cta-button" id="start-button" style="
+             
+                font-family: 'Pacifico', cursive; /* Playful font for CTA */
+                font-size: 1.4rem;
+                font-weight: bold;
+                color: #1E90FF; /* Bright blue color */
+                text-decoration: none;
+                background-color: #FFFFFF;
+                padding: 12px 30px;
+                border-radius: 30px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                transition: all 0.3s ease;
+            " onmouseover="this.style.backgroundColor='#00FFFF'; this.style.color='#000';" onmouseout="this.style.backgroundColor='#FFFFFF'; this.style.color='#1E90FF';">
+                Try It Now
+            </a>
+        </div>
+    </section>
+
+    <!-- Three.js for Hero Background -->
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.createElement("canvas") });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById("hero-background").appendChild(renderer.domElement);
+
+
+        // Handle the button click
+        document.getElementById('start-button').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default anchor click behavior
+
+            // Animate all the content upwards using GSAP
+            gsap.to('#content', {
+                y: -1000, // Move it upwards
+                opacity: 0, // Fade out
+                duration: 1, // Duration of the animation
+                ease: 'power2.inOut', // Easing function
+                onComplete: function() {
+                    // After the animation is complete, redirect to the login page
+                    window.location.href = event.target.href;
+                }
+            });
+        });
+
+        // Add Birds: Using simple 3D shapes as birds or bird sprites
+        const birdMaterial = new THREE.SpriteMaterial({ map: new THREE.TextureLoader().load("{{ url_for('static', filename='resources/bird.png') }}"), transparent: true });
+        const birds = [];
+
+        for (let i = 0; i < 5; i++) {
+            const bird = new THREE.Sprite(birdMaterial);
+            bird.position.set(Math.random() * 20 - 10, Math.random() * 3 + 4, Math.random() * 6 - 4);
+            bird.scale.set(1, 1, 1);
+            birds.push(bird);
+            scene.add(bird);
+            bird.renderOrder = 1
+        }
+        
+
+        // Plane geometry for waves
+        const geometry = new THREE.PlaneGeometry(20, 20, 40, 40);
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x007bff,
+            wireframe: false,
+            transparent: true,
+            opacity: 0.8,
+        });
+        const plane = new THREE.Mesh(geometry, material);
+        plane.rotation.x = -Math.PI / 2;
+        scene.add(plane);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(0, 5, 5);
+        scene.add(directionalLight);
+
+        // Set sky color for light blue sky
+        scene.background = new THREE.Color(0x9ce2ff); // Light blue sky color
+
+        // Add Clouds: Using a simple sprite texture for clouds
+        const cloudTexture = new THREE.TextureLoader().load("{{ url_for('static', filename='resources/cloud.png') }}"); // Replace with your cloud texture image
+        const cloudMaterial = new THREE.SpriteMaterial({ map: cloudTexture, transparent: true });
+        const clouds = [];
+
+        // Create several clouds
+        for (let i = 0; i < 15; i++) {
+            const cloud = new THREE.Sprite(cloudMaterial);
+            cloud.position.set(Math.random() * 25 - 12.5, Math.random() * 3 + 4, Math.random() * 6 - 6); // Random positions
+            rs = Math.random() + 2
+            cloud.scale.set(rs , rs , 1); // Random scale for variety
+            clouds.push(cloud);
+            scene.add(cloud);
+        }
+
+
+        // Animate Clouds and Birds
+        function animateCloudsAndBirds() {
+            const time = Date.now() * 0.001;
+            var i = -1
+            clouds.forEach(cloud => {
+                i = i * -1
+                //cloud.position.x += Math.sin(time) * 0.05;
+                cloud.position.y += Math.cos(time) * 0.005 * i;
+            });
+
+            birds.forEach(bird => {
+                i = i * -1
+                bird.position.x += Math.sin(time) * 0.1 * i;
+                bird.position.y += Math.sin(time * 0.5) * 0.05 ;
+            });
+        }
+
+        // basic box 
+        const boxGeometry = new THREE.BoxGeometry(2, 1, 0.5); // Simple ship box
+        const boxMaterial = new THREE.MeshStandardMaterial({ color: 0xFF6666 });
+        const box1 = new THREE.Mesh(boxGeometry, boxMaterial);
+        const box2 = new THREE.Mesh(boxGeometry, boxMaterial);
+        box1.position.set(4, 0, 0); // Position in the center of the screen
+        box2.position.set(-4, 0, 0); // Position in the center of the screen
+        scene.add(box1);
+        scene.add(box2)
+
+        // Ship Geometry - More accurate from a front-facing perspective
+        const shipHullGeometry = new THREE.CylinderGeometry(3, 1, 4, 6); // Hull of the ship (cylinder-like shape)
+        const shipHullMaterial = new THREE.MeshStandardMaterial({ color: 0x8789AF }); // Hull color
+        const shipHull = new THREE.Mesh(shipHullGeometry, shipHullMaterial);
+        shipHull.position.set(0, 2.5, -2); // Position to center it better
+        scene.add(shipHull);
+
+        // Ship Deck (top part)
+        const shipDeckGeometry = new THREE.BoxGeometry(5, 0.5, 4.5); // Deck as a flat box
+        const shipDeckMaterial = new THREE.MeshStandardMaterial({ color: 0x404040 }); // Deck color
+        const shipDeck = new THREE.Mesh(shipDeckGeometry, shipDeckMaterial);
+        shipDeck.position.set(0, 5, -4); // Positioned on top of the hull
+        scene.add(shipDeck);
+
+    
+
+        // Camera position
+        camera.position.set(0, 3, 5);
+
+        // Ship wobble effect based on waves
+        function animateWaves() {
+            const time = Date.now() * 0.001;
+            for (let i = 0; i < plane.geometry.attributes.position.array.length; i += 3) {
+                plane.geometry.attributes.position.array[i + 2] = Math.sin(i * 0.1 + time) * 0.5;
+            }
+            plane.geometry.attributes.position.needsUpdate = true;
+
+            // Wobble ship with the waves
+            box1.position.y = Math.sin(time * 2) * 0.2 + 0.5; // Ship wobbling on the waves
+            box1.rotation.y = Math.sin(time) * 0.05 + 0.1; // Slight rotation for extra effect
+            box2.position.y = Math.sin(time * 2) * 0.2 + 0.5; 
+            box2.rotation.y = Math.sin(time) * 0.05 + 0.1; 
+
+            shipHull.position.y = Math.sin(time * 2) * 0.2 + 0.5;
+            shipHull.rotation.y = Math.sin(time) * 0.05;
+            shipDeck.position.y = Math.sin(time * 2) * 0.2 + 2.3;
+            shipDeck.rotation.y = Math.sin(time) * 0.05;
+        }
+
+        // Render loop
+        function render() {
+            animateWaves();
+            animateCloudsAndBirds();
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
+        render();
+
+        // Adjust canvas on window resize
+        window.addEventListener("resize", () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+
+    <div class="content-section">
+        <div class="threeD-ocean-container"></div>
+        <div class="content-header">
+            <h1>Welcome to <span style="color: #28a745;">3d Container Loading</span></h1>
+            <!-- <p>Visualize and Optimize Your Packing Process</p> -->
+        </div>
+
+        <div class="container">
+
+            <div class="features">
+                <div class="feature-card">
+                    <i class="fas fa-cube"></i>
+                    <h4>Interactive 3D Visualizations</h4>
+                    <p>Watch your cargo items being packed into containers step-by-step, and interact with the plot in real time.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-play-circle"></i>
+                    <h4>Step-by-Step Simulation</h4>
+                    <p>See a dynamic sequence of packing steps to understand how your cargo fits efficiently into the container.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-clock"></i>
+                    <h4>Real-Time Results</h4>
+                    <p>Instantly view packing configurations and assess their effectiveness in real-time.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-bar"></i>
+                    <h4>Customizable Configurations</h4>
+                    <p>Simulate different strategies by adjusting parameters like container size and packing order.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-highlighter"></i>
+                    <h4>High-Quality Visuals</h4>
+                    <p>Generate high-resolution images of your packing process for clarity and detailed analysis.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-warehouse"></i>
+                    <h4>Applications</h4>
+                    <p>Perfect for logistics, warehouse management, manufacturing, and e-commerce businesses.</p>
+                </div>
+            </div>
+
+            <p class="text-center" style="
+                font-family: 'Montserrat', sans-serif;
+                font-weight: bold;
+                color: #FFFFFF;
+                text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+                font-size: 1.5rem; /* Adjust for responsiveness */
+                line-height: 1.5;
+                max-width: 80%;
+                margin: 0 auto;
+                padding: 20px;
+                background: rgba(0, 0, 0, 0.3); /* Optional: adds subtle background for better contrast */
+                border-radius: 10px;
+            ">Efficient packaging and container optimization are crucial in logistics, manufacturing, and shipping. 
+                3d Container Loading helps you streamline and visualize the process of packing cargo into containers 
+                with interactive, 3D, step-by-step visualizations.
+            </p>
+            <p class="text-center">Dive into the world of Container optimization.</p>
+        </div>
+        <div class="call-to-action" >
+            <a class="rainbow-text" href="payment/user_email">Buy Premium Subscription</a>
+        </div>
+        
+    </div>
+    <script>
+        // Scene setup
+        const oceanScene = new THREE.Scene();
+        const oceanCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const oceanRenderer = new THREE.WebGLRenderer({ alpha: true }); // Transparent background
+        oceanRenderer.setSize(window.innerWidth, window.innerHeight*2);
+        oceanRenderer.setPixelRatio(window.devicePixelRatio);
+        document.querySelector(".threeD-ocean-container").appendChild(oceanRenderer.domElement);
+
+        // Lighting
+        const ambientOceanLight = new THREE.AmbientLight(0xffffff, 0.8);
+        oceanScene.add(ambientOceanLight);
+
+        // Create multiple wave layers
+        const waveMaterials = [];
+        const waveMeshes = [];
+        const waveCount = 10; // Number of wave layers
+
+        var r = 1
+        for (let i = 0; i < waveCount; i++) {
+            r = r * -1
+            const waveGeometry = new THREE.PlaneGeometry(40, 40, 80, 80); // Adjust for larger waves
+            const waveMaterial = new THREE.MeshStandardMaterial({
+                color: 0x0077be, // Ocean blue
+                transparent: true,
+                opacity: 0.5, // Reduce opacity for deeper layers
+                wireframe: false,
+            });
+            const waveMesh = new THREE.Mesh(waveGeometry, waveMaterial);
+            waveMesh.rotation.x = i * -Math.PI / 2 ;
+            //waveMesh.position.y =  i/10
+            waveMesh.position.z = -i * 2; // Stagger layers in depth
+            waveMaterials.push(waveMaterial);
+            waveMeshes.push(waveMesh);
+            oceanScene.add(waveMesh);
+        }
+
+        // Camera position
+        oceanCamera.position.set(0, 3, 5);
+
+        // Wave animation function
+        function animateWaves2() {
+            const time = Date.now() * 0.001;
+            waveMeshes.forEach((mesh, index) => {
+                const waveSpeed = 5; // Different speed for each layer
+                const waveHeight = 0.5; // Different height for each layer
+                const positions = mesh.geometry.attributes.position.array;
+
+                for (let i = 0; i < positions.length; i += 3) {
+                    //positions[i + 2] = Math.sin(i * 0.4 + time * waveSpeed) * waveHeight; // Adjust Z for waves
+                    positions[i+2] = Math.sin(i*0.1+time) * 0.5
+                }
+
+                mesh.geometry.attributes.position.needsUpdate = true;
+            });
+        }
+
+        // Render loop
+        function renderOcean() {
+            animateWaves2();
+            oceanRenderer.render(oceanScene, oceanCamera);
+            requestAnimationFrame(renderOcean);
+        }
+        renderOcean();
+
+        // Handle window resize
+        window.addEventListener("resize", () => {
+            oceanCamera.aspect = window.innerWidth / window.innerHeight;
+            oceanCamera.updateProjectionMatrix();
+            oceanRenderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>

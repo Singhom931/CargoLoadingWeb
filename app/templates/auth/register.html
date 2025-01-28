@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Invaders Registration</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            color: black;
+        }
+
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            /*transform: translate(-172%,-50%);
+            /*z-index: -1; /* Move iframe to the background */
+            border: none;
+        }
+
+        .register-container {
+            z-index: 1;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(15px);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        input[type="email"], input[type="password"] {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            outline: none;
+        }
+
+        button {
+            width: 90%;
+            padding: 15px;
+            margin: 20px 0;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(90deg, #e0109b, #c316da, #e0109b);
+        }
+
+        a {
+            color: #fbc531;
+            text-decoration: none;
+            font-size: 1em;
+        }
+
+        #playBtn {
+            position: absolute;
+            top: -2vh;
+            left: 175vb;
+            width: 30vb;
+            background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #playBtn:hover {
+            background: linear-gradient(90deg, #e0109b, #c316da, #e0109b);
+        }
+    </style>
+</head>
+<body>
+    <!-- Place iframe in the background -->
+    <iframe id='gameCanvas' src="{{ url_for('main.wham') }}"></iframe>
+
+    <div class="register-container">
+        <h1>Register</h1>
+        <form id="register-form" method="POST">
+            <input type="email" name="email" placeholder="Enter your email" required>
+            <input type="password" name="password" placeholder="Enter your password" required>
+            <input type="password" name="repeatpassword" placeholder="Enter your password again" required>
+            <button type="submit">Register</button>
+        </form>
+    </div>
+    <button id="playBtn">Play</button>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Player setup and game logic
+        const player = { x: canvas.width / 2 - 25, y: canvas.height - 60, width: 50, height: 50, speed: 14 };
+        let isPlaying = false;
+
+        // Game loop and controls (you can adapt this as per your game logic)
+        document.getElementById("playBtn").addEventListener("click", function() {
+            if (!isPlaying) {
+                isPlaying = true;
+                document.querySelector(".register-container").style.display = "none";
+                document.getElementById("playBtn").textContent = "Stop";
+                // Add game start logic
+            } else {
+                isPlaying = false;
+                document.querySelector(".register-container").style.display = "block";
+                document.getElementById("playBtn").textContent = "Play";
+                // Add game stop logic
+            }
+        });
+
+        function gameLoop() {
+            // Game logic (draw elements)
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+    
+</body>
+</html>

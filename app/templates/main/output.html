@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Output Page</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        /* Styling the tabs */
+        .tabs {
+            display: flex;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .tabs .tab {
+            margin-right: 20px;
+            padding: 10px;
+            background-color: #ddd;
+            border-radius: 4px;
+        }
+
+        .tabs .tab.active {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        /* Hide all content by default */
+        .tab-content {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Animation container styling */
+        .animation-container {
+            width: 500px;
+            height: 500px;
+            margin-top: 20px;
+        }
+
+        .animation-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+    <style>
+        /* Styling for the container that holds both content and animation */
+        .main-container {
+            display: flex;
+            align-items: flex-start; /* Aligns items at the top */
+        }
+
+        /* Styling for the tab-content container */
+        #tab-content-container {
+            width: 60%; /* Adjust width as needed */
+            margin-right: 20px; /* Space between the two containers */
+            padding-bottom: 30%;
+        }
+
+        /* Styling for the animation container */
+        #animation-container {
+            position: fixed;
+            bottom: 0; 
+            right: 0;
+            top: 55vh;
+            left: 68vw;
+            width: 30vw;
+            height: 30vh;
+            z-index: 10;
+            margin-top: 0%;
+        }
+
+        /* Styling for the animated image */
+        #animated-image {
+            max-width: 100%; /* Ensures the image fits within its container */
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 0%;
+            /*z-index: 10;*/
+        }
+    </style>
+    <style>
+        /* Container styles with grid layout */
+        #gravity-visual {
+            width: 350px;
+            margin: 20px auto;
+        }
+
+        #gravity-visual h1 {
+            text-align: center;
+            color: #333; /* Dark color for visibility */
+            font-size: 2rem; /* Increase font size if needed */
+            margin-top: 20px;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            position: absolute;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr 1fr 1fr;
+            top: 55vh;
+            right: 12vw;
+            width: 200px;
+            height: 300px;
+            border: 3px solid #333;
+            background-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .title {
+            grid-column: span 2; /* Span across two columns */
+            background-color: #f3f3f3; /* Light background for the title */
+            padding: 10px;
+            text-align: center;
+            font-size: 1.5rem;
+            color: #333;
+            font-weight: bold;
+            border-bottom: 2px solid #ccc;
+        }
+
+        .quadrant {
+            position: absolute;
+            width: 100%; /* Full width */
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 1s ease;
+            font-size: 1 rem;
+            color: white;
+            font-weight: bold;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Cool hover effect */
+        .quadrant:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .gravity-value {
+            position: absolute;
+            bottom: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .container .quadrant:nth-child(1) {
+            background-color: rgba(255, 0, 0, 0.5); /* Red */
+            z-index: 10;
+        }
+
+        .container .quadrant:nth-child(2) {
+            background-color: rgba(0, 255, 0, 0.5); /* Green */
+            z-index: 10;
+        }
+
+        .container .quadrant:nth-child(3) {
+            background-color: rgba(0, 0, 255, 0.5); /* Blue */
+            z-index: 10;
+        }
+
+        .container .quadrant:nth-child(4) {
+            background-color: rgba(235, 235, 5, 0.5); /* Yellow */
+            z-index: 20;
+        }
+    </style>
+    
+</head>
+<body>
+
+    <!-- Tabs to select different plots -->
+    <div class="tabs">
+        {% for plot in plots_3d %}
+            <div class="tab" id="tab-{{ loop.index0 }}" onclick="changeTab({{ loop.index0 }})">
+                Tab {{ loop.index0 + 1 }}
+            </div>
+        {% endfor %}
+    </div>
+
+<div class="main-container">
+
+    <!-- Divs to hold the tab content -->
+    <div id="tab-content-container">
+        {% for plot in plots_3d %}
+            <div class="tab-content" id="content-{{ loop.index0 }}">
+                {{ plot|safe }}
+            </div>
+        {% endfor %}
+        <div id = "usage-container">
+        <!-- <div id="volume-usage">
+            <div class="donut-chart">
+                <svg class="donut" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="donut-ring" cx="18" cy="18" r="15.915" fill="transparent" stroke="#d3d3d3" stroke-width="3"></circle>
+                    <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" stroke="#4caf50" stroke-width="3" 
+                        stroke-dasharray="0 100" stroke-dashoffset="25"></circle>
+                </svg>
+                <div class="donut-center">
+                    <div class="volume-text" id="volume-text"></div>
+                </div>
+            </div>
+            <div class="weight-chart">
+                <svg class="donut" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="donut-ring" cx="18" cy="18" r="15.915" fill="transparent" stroke="#d3d3d3" stroke-width="3"></circle>
+                    <circle class="donut-segment" cx="18" cy="18" r="15.915" fill="transparent" stroke="#4caf50" stroke-width="3" 
+                        stroke-dasharray="0 100" stroke-dashoffset="25"></circle>
+                </svg>
+                <div class="donut-center">
+                    <div class="weight-text" id="weight-text"></div>
+                </div>
+            </div>
+        </div> -->
+    </div>
+
+    <!-- <h1>3D Plots</h1> -->
+    <div id="animation-container">
+        <!-- The img tag to display the animated frames -->
+        <!-- <img id="animated-image" src="data:image/png;base64,{{ plots_list[0][0] }}" class="plot" alt="3D Plot" /> -->
+    </div>
+    <div id="gravity-visual">
+        <div class="container">
+            <div class="title">Gravity Distribution Visualization</div>
+            <div class="quadrant" id="quadrant-1">
+                <div class="gravity-value" id="gravity-1">0%</div>
+            </div>
+            <div class="quadrant" id="quadrant-2">
+                <div class="gravity-value" id="gravity-2">0%</div>
+            </div>
+            <div class="quadrant" id="quadrant-3">
+                <div class="gravity-value" id="gravity-3">0%</div>
+            </div>
+            <div class="quadrant" id="quadrant-4">
+                <div class="gravity-value" id="gravity-4">0%</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+    <script>
+        const plotsList = {{ plots_list|tojson }};
+
+        let currentFrame = 0;
+        let currentTabIndex = 0;
+
+        // Initially set the first tab to active
+        document.addEventListener("DOMContentLoaded", function() {
+            changeTab(0);  // Load the first plot by default
+        });
+
+        // Function to change the tab and display its content
+        function changeTab(tabIndex) {
+            // Remove active class from all tabs and contents
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Add active class to the selected tab and content
+            document.getElementById('tab-' + tabIndex).classList.add('active');
+            document.getElementById('content-' + tabIndex).classList.add('active');
+
+            currentTabIndex = tabIndex; // Set the new tab index
+            currentFrame = 0; // Reset the frame for the new tab
+
+            //volumeusage();
+            //updateWeightDonut();
+            updateGravityVisual(gravity[currentTabIndex]);
+
+        }
+
+        /*function updateImage() {
+            const imgElement = document.getElementById('animated-image');
+            const images = plotsList[currentTabIndex];
+    
+            // Update the src attribute with the next image
+            imgElement.src = `data:image/png;base64,${images[currentFrame]}`;
+    
+            // Increment frame or reset to 0
+            currentFrame = (currentFrame + 1) % images.length;
+        }*/
+
+        // Start the animation (loop through frames every 500ms)
+        //setInterval(updateImage, 500);
+
+    </script>
+    <script>
+        // Assuming gravity is passed as a list of 4 values from your backend
+        const gravity = {{ gravity | tojson }};  // gravity is [g1, g2, g3, g4]
+    
+        // Update the gravity values and styles
+        function updateGravityVisual(gravity) {
+            console.log(gravity)
+            const total = gravity.reduce((acc, val) => acc + val, 0);
+            const percentages = gravity.map(g => (g / total * 100).toFixed(2));
+    
+            // Set the background colors based on the gravity percentages
+            document.getElementById('gravity-1').innerText = `${percentages[0]}%`;
+            document.getElementById('quadrant-1').style.backgroundColor = `rgba(255, 0, 0, 0.25)`;
+    
+            document.getElementById('gravity-2').innerText = `${percentages[1]}%`;
+            document.getElementById('quadrant-2').style.backgroundColor = `rgba(0, 255, 0, 0.25)`;
+    
+            document.getElementById('gravity-3').innerText = `${percentages[2]}%`;
+            document.getElementById('quadrant-3').style.backgroundColor = `rgba(0, 0, 255, 0.25)`;
+    
+            document.getElementById('gravity-4').innerText = `${percentages[3]}%`;
+            document.getElementById('quadrant-4').style.backgroundColor = `rgba(235, 235, 0, 0.25)`;
+        }
+    
+        // Call the function to update the gravity visual
+        updateGravityVisual(gravity[currentTabIndex]);
+    </script>
+    <!-- <script>
+        volume_usage = {{ volume_usage | tojson }};
+        weight_usage = {{ weight_usage | tojson }};
+
+        function volumeusage() {
+            // Sample data (container volume and total volume used)
+            let containerVolume = volume_usage[0][currentTabIndex]; // Example: Total container volume
+            const totalVolumeUsed = volume_usage[1][currentTabIndex]; // Example: Used volume
+            // Calculate percentage used
+            const percentageUsed = ((totalVolumeUsed / containerVolume) * 100).toFixed(1); // Keep one decimal point
+        
+            // Update the donut graph
+            const segment = document.querySelector(".donut-segment");
+            const volumeText = document.getElementById("volume-text");
+        
+            // Set stroke-dasharray based on percentage
+            segment.setAttribute("stroke-dasharray", `${percentageUsed} ${100 - percentageUsed}`);
+            
+            // Update the center text
+            volumeText.textContent = `Volume Used: ${totalVolumeUsed}/${containerVolume} (${percentageUsed}%)`;
+        }
+        function updateWeightDonut() {
+            let usedWeight =  weight_usage[1][currentTabIndex]
+            let totalWeight =  weight_usage[0][currentTabIndex]
+            console.log(usedWeight,totalWeight)
+
+            const percentage = (usedWeight / totalWeight) * 100;
+            console.log(percentage)
+            const donutSegment = document.querySelector('.donut-segment-weight');
+            const weightText = document.getElementById("weight-text");
+        
+            // Update the stroke-dasharray for the donut segment
+            //donutSegment.style = `stroke-dasharray: ${percentage} ${100 - percentage}`;
+            donutSegment.setAttribute("stroke-dasharray", `${percentage} ${100 - percentage}`);
+
+            // Update the center text
+            weightText.textContent = `Weight Used: ${usedWeight}/${totalWeight} (${percentage}%)`;
+        }
+        
+    </script> -->
+    
+</body>
+</html>
