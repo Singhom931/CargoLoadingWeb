@@ -402,9 +402,26 @@ const smokeParticles = new THREE.Points(smokeGeometry, smokeMaterial);
 let cargoItems = [];
 let isTruckMoving = false;
 
-camera.position.z = 10;
-camera.position.y = 4;
-
+camera.position.z = 7;
+camera.position.y = 3;
+// Save initial position and rotation
+const defaultCameraState = {
+    position: camera.position.clone(),
+    rotation: camera.rotation.clone(),
+    fov: camera.fov,
+    aspect: camera.aspect,
+    near: camera.near,
+    far: camera.far
+};
+function resetCamera() {
+    camera.position.copy(defaultCameraState.position);
+    camera.rotation.copy(defaultCameraState.rotation);
+    camera.fov = defaultCameraState.fov;
+    camera.aspect = defaultCameraState.aspect;
+    camera.near = defaultCameraState.near;
+    camera.far = defaultCameraState.far;
+    camera.updateProjectionMatrix(); // Important!
+}
 // Function to create and update cargo model
 function updateCargo() {
     const name = document.getElementById("cargo-name").value;
@@ -625,6 +642,7 @@ document.getElementById("playBtn").addEventListener("click", function() {
         truck.rotation.set(0,-0.01,0)
         scene.background = texture;
         ground.visible = true
+        updateCargo()
 
     } else {
         isPlaying = false;
@@ -639,6 +657,7 @@ document.getElementById("playBtn").addEventListener("click", function() {
         scene.background = white;
         ground.visible = false
         document.getElementById("cargoTable").style.display = "table";
+        scene.remove(cargoItem);
         resetCamera();
     }
 });

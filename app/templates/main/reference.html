@@ -13,9 +13,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #ffffff;
-            color: black;
-            position: relative;
+            background-color:  #f5f5f5;
+            color:  white;
+            perspective: 1000px;
+            /* position: relative; */
         }
 
         canvas {
@@ -27,7 +28,7 @@
 
         .reference-container {
             z-index: 1; /* Ensure form is above the iframe */
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(255, 255, 255, 0.9);/*rgba(0, 0, 0, 0.7);*/
             backdrop-filter: blur(15px);
             padding: 30px;
             border-radius: 15px;
@@ -35,13 +36,26 @@
             max-width: 400px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
-            color: white;
+            color: #333;
         }
 
         h1 {
             font-size: 2.5em;
             margin-bottom: 20px;
-            color: white;
+            background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient-flow 4s infinite alternate;
+        }
+
+        @keyframes gradient-flow {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
         }
 
         input[type="text"] {
@@ -69,25 +83,33 @@
             transition: all 0.3s ease;
         }
 
-        button:hover {
-            background: linear-gradient(90deg, #e0109b, #c316da, #e0109b);
-        }
-
         #playBtn {
             position: absolute;
-            top: -2vh;
-            left: 175vb;
+            top: 0vh;
+            right: 5vb;
             width: 30vb;
-            background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+            background-color: #4CAF50;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
-            font-weight: bold;
             cursor: pointer;
+            transition: transform 0.2s ease;
+            transform-style: preserve-3d;
+            will-change: transform;
         }
 
         #playBtn:hover {
             background: linear-gradient(90deg, #e0109b, #c316da, #e0109b);
+        }
+
+        .reference-container {
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            will-change: transform;
+        }
+
+        body:hover .reference-container {
+            will-change: transform;
         }
     </style>
 </head>
@@ -134,6 +156,7 @@
         const player = { x: canvas.width / 2 - 25, y: canvas.height - 60, width: 50, height: 50, speed: 14 };
 
         // Game settings
+        const gridSize = 30;
         let bullets = [];
         let enemy_bullets = [];
         let enemies = [];
@@ -146,6 +169,26 @@
         const enemySpeed = 10;
         let autogun = 0
         let score = 0
+
+        function drawGrid() {
+            // ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            // ctx.shadowBlur = 4;
+            // ctx.shadowOffsetX = 2;
+            // ctx.shadowOffsetY = 2;
+
+            ctx.fillStyle = "#eeeeee";
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                for (let y = 0; y < canvas.height; y += gridSize) {
+                    ctx.fillStyle = "#ddd";
+                    ctx.fillRect(x, y, gridSize - 1, gridSize - 1);
+                    
+                }
+            }
+            // ctx.shadowBlur = 0;
+            // ctx.shadowOffsetX = 0;
+            // ctx.shadowOffsetY = 0;
+            
+        }
 
         // Initialize enemies
         function createEnemies() {
@@ -253,6 +296,7 @@
         // Game loop
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGrid();
             drawPlayer();
             drawEnemies();
             drawBullets();
@@ -303,11 +347,85 @@
             }
         });
 
+        document.addEventListener('mousemove', (e) => {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            const rotateY = (mouseX - centerX) / 75;
+            const rotateX = -(mouseY - centerY) / 75;
+
+            canvas.style.transform = `perspective(800px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+        });
 
         gameLoop();
 
         // Initial enemy creation
         createEnemies();
+    </script>
+    <script>
+        const card = document.querySelector('.reference-container');
+        const playBtn = document.getElementById('playBtn');
+    
+        let playBtnHovered = false;
+    
+        document.addEventListener('mousemove', (e) => {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+    
+            const rotateY = (mouseX - centerX) / 25;
+            const rotateX = -(mouseY - centerY) / 25;
+    
+            const sharedTransform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg) scale(1.03)`;
+            const sharedShadow = `${-rotateY}px ${rotateX}px 30px rgba(0, 0, 0, 0.2)`;
+    
+            // Apply tilt to login container
+            card.style.transform = sharedTransform;
+            card.style.boxShadow = sharedShadow;
+    
+            // Only sync playBtn when not hovered
+            if (!playBtnHovered) {
+                playBtn.style.transform = sharedTransform;
+                playBtn.style.boxShadow = sharedShadow;
+            }
+        });
+    
+        document.addEventListener('mouseleave', () => {
+            card.style.transform = 'rotateY(0deg) rotateX(0deg) scale(1)';
+            card.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.3)';
+    
+            playBtn.style.transform = 'rotateY(0deg) rotateX(0deg) scale(1)';
+            playBtn.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.2)';
+        });
+    
+        // When mouse enters play button, tilt based on its own center
+        playBtn.addEventListener('mouseenter', () => {
+            playBtnHovered = true;
+        });
+    
+        playBtn.addEventListener('mousemove', (e) => {
+            if (!playBtnHovered) return;
+    
+            const rect = playBtn.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+    
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+    
+            const rotateY = (mouseX - centerX) / 15;
+            const rotateX = -(mouseY - centerY) / 15;
+    
+            playBtn.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg) scale(1.05)`;
+            playBtn.style.boxShadow = `${-rotateY}px ${rotateX}px 20px rgba(0, 0, 0, 0.2)`;
+        });
+    
+        playBtn.addEventListener('mouseleave', () => {
+            playBtnHovered = false;
+        });
     </script>
    
 </body>
