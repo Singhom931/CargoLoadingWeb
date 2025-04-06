@@ -15,6 +15,7 @@
             align-items: center;
             background-color: #f5f5f5;
             color: white;
+            perspective: 1000px; /* Adds 3D depth */
         }
 
         canvas {
@@ -92,15 +93,29 @@
 
         #playBtn {
             position: absolute;
-            top: -2vh;
-            left: 175vb;
+            top: 0vh;
+            right: 5vb;
             width: 30vb;
             background-color: #4CAF50;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
+            transition: transform 0.2s ease;
+            transform-style: preserve-3d;
+            will-change: transform;
         }
+
+        .login-container {
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            will-change: transform;
+        }
+
+        body:hover .login-container {
+            will-change: transform;
+        }
+
     </style>
 </head>
 <body>
@@ -124,6 +139,10 @@
 
         // Game settings
         const gridSize = 30; // Size of each cell
+        let lastSnake = [];
+        let lastMoveTime = Date.now();
+        let moveInterval = 150; // in ms
+
         let snake = [{ x: 5, y: 5 }];
         let direction = { x: 0, y: 0 };
         let cargo = spawnCargo();
@@ -157,19 +176,46 @@
         }
 
         function drawSnake() {
-            ctx.fillStyle = "#4caf50";
-            snake.forEach((segment, index) => {
-                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 1, gridSize - 1);
-                if (index === 0) {
-                    ctx.fillStyle = "#357a38"; // Head color
-                }
+            let now = Date.now();
+            let progress = Math.min((now - lastMoveTime) / moveInterval, 1);
+
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+
+            snake.forEach((segment, i) => {
+                let prev = lastSnake[i] || segment;
+
+                let interpX = prev.x + (segment.x - prev.x) * progress;
+                let interpY = prev.y + (segment.y - prev.y) * progress;
+
+                ctx.fillStyle = i === 0 ? "#357a38" : "#4caf50";
+                ctx.fillRect(interpX * gridSize, interpY * gridSize, gridSize - 1, gridSize - 1);
             });
+
+            ctx.shadowBlur = 0;
         }
 
         function drawCargo() {
+            const x = cargo.x * gridSize;
+            const y = cargo.y * gridSize;
+
+            ctx.save();
+            ctx.translate(x + gridSize / 2, y + gridSize / 2);
+            ctx.rotate(Math.sin(Date.now() / 200) * 0.1); // Slight rotation effect
+            ctx.scale(1.1, 1.1);
+
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+            ctx.shadowBlur = 6;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+
             ctx.fillStyle = "#ff5722";
-            ctx.fillRect(cargo.x * gridSize, cargo.y * gridSize, gridSize - 1, gridSize - 1);
+            ctx.fillRect(-gridSize / 2, -gridSize / 2, gridSize - 1, gridSize - 1);
+            ctx.restore();
         }
+
 
         function drawScore() {
             ctx.fillStyle = "#000";
@@ -301,6 +347,12 @@
             //gameLoop();
         }
 
+        function updateSnakeAndTime() {
+            lastSnake = snake.map(s => ({ ...s }));
+            lastMoveTime = Date.now();
+            updateSnake(); // your existing movement logic
+        }
+
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawGrid();
@@ -310,7 +362,8 @@
             if (!isPlaying){
             findDirection(); // Calculate next direction
             }
-            updateSnake();
+            // updateSnake();
+            updateSnakeAndTime();
             setTimeout(gameLoop, speed);
             //requestAnimationFrame(gameLoop);
         }
@@ -320,7 +373,83 @@
             canvas.height = window.innerHeight;
         });
 
+        document.addEventListener('mousemove', (e) => {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            const rotateY = (mouseX - centerX) / 100;
+            const rotateX = -(mouseY - centerY) / 100;
+
+            canvas.style.transform = `perspective(800px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+        });
+
+
         gameLoop();
+    </script>
+    <script>
+        const card = document.querySelector('.login-container');
+        const playBtn = document.getElementById('playBtn');
+    
+        let playBtnHovered = false;
+    
+        document.addEventListener('mousemove', (e) => {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+    
+            const rotateY = (mouseX - centerX) / 25;
+            const rotateX = -(mouseY - centerY) / 25;
+    
+            const sharedTransform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg) scale(1.03)`;
+            const sharedShadow = `${-rotateY}px ${rotateX}px 30px rgba(0, 0, 0, 0.2)`;
+    
+            // Apply tilt to login container
+            card.style.transform = sharedTransform;
+            card.style.boxShadow = sharedShadow;
+    
+            // Only sync playBtn when not hovered
+            if (!playBtnHovered) {
+                playBtn.style.transform = sharedTransform;
+                playBtn.style.boxShadow = sharedShadow;
+            }
+        });
+    
+        document.addEventListener('mouseleave', () => {
+            card.style.transform = 'rotateY(0deg) rotateX(0deg) scale(1)';
+            card.style.boxShadow = '0 8px 30px rgba(0, 0, 0, 0.3)';
+    
+            playBtn.style.transform = 'rotateY(0deg) rotateX(0deg) scale(1)';
+            playBtn.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.2)';
+        });
+    
+        // When mouse enters play button, tilt based on its own center
+        playBtn.addEventListener('mouseenter', () => {
+            playBtnHovered = true;
+        });
+    
+        playBtn.addEventListener('mousemove', (e) => {
+            if (!playBtnHovered) return;
+    
+            const rect = playBtn.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+    
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+    
+            const rotateY = (mouseX - centerX) / 15;
+            const rotateX = -(mouseY - centerY) / 15;
+    
+            playBtn.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg) scale(1.05)`;
+            playBtn.style.boxShadow = `${-rotateY}px ${rotateX}px 20px rgba(0, 0, 0, 0.2)`;
+        });
+    
+        playBtn.addEventListener('mouseleave', () => {
+            playBtnHovered = false;
+        });
     </script>
 </body>
 </html>

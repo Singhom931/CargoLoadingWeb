@@ -617,7 +617,6 @@ document.getElementById("playBtn").addEventListener("click", function() {
         speed = 100;
         document.getElementById("playBtn").textContent = "Stop";
         document.getElementById("cargoTable").style.display = "none";
-        document.getElementById("images").style.display = "none";
         document.getElementById("addBtn").style.display = "none";
         document.getElementById("nextBtn").style.display = "none";
         document.getElementById("cargotitle").style.display = "none";
@@ -632,7 +631,6 @@ document.getElementById("playBtn").addEventListener("click", function() {
         speed = 10;
         document.getElementById("playBtn").textContent = "Play";
         document.getElementById("cargoTable").style.display = "block";
-        document.getElementById("images").style.display = "block";
         document.getElementById("addBtn").style.display = "block";
         document.getElementById("nextBtn").style.display = "block";
         document.getElementById("cargotitle").style.display = "block";
@@ -640,7 +638,8 @@ document.getElementById("playBtn").addEventListener("click", function() {
         truck.position.set(0, -3, -12.5);
         scene.background = white;
         ground.visible = false
-
+        document.getElementById("cargoTable").style.display = "table";
+        resetCamera();
     }
 });
 

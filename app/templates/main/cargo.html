@@ -38,14 +38,25 @@
         table {
             /*background:  linear-gradient(90deg, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d);
             */
-            background:  linear-gradient(0deg, #90276d, #54096d, #90276d);
             width: 100%;
             border-collapse: collapse;
             margin: 0 auto;
             table-layout: fixed; /* Ensures fixed column layout */
-            background-color: #fff;
+            /* background-color: #ddd; */
+            /*backdrop-filter: blur(6px); /* blurs the 3D canvas behind */
+            /* -webkit-backdrop-filter: blur(6px); */
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             /*z-index: 1;*/
+        }
+
+        thead{
+            background:  linear-gradient(0deg, #90276d, #81206D, #90276d);
+
+        }
+
+        tbody {
+            background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent rows */
+            color: #000;
         }
     
         th, td {
@@ -62,10 +73,59 @@
         }
     
         td {
-            background-color: #f9f9f9;
+            transition: background-color 0.3s ease;
+            /* background-color: #f9f9f9; */
             font-size: 1rem;
         }
-    
+        
+        table {
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: fixed;
+        }
+
+        td, th {
+        padding: 4px 6px;
+        text-align: center;
+        vertical-align: middle;
+        }
+
+        td input,
+        td select,
+        td label {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent;
+        padding: 2px;
+        font: inherit;
+        box-sizing: border-box;
+        text-align: center;
+        }
+
+        td input:focus {
+        outline: none;
+        background-color: #eef; /* optional focus style */
+        }
+
+        td input[type="color"] {
+        padding: 0;
+        width: 100%;
+        height: 30px;
+        border: none;
+        }
+
+        td input[type="checkbox"] {
+        transform: scale(1.2);
+        margin: 0 auto;
+        display: block;
+        }
+
+        td label {
+        display: block;
+        font-size: 0.8em;
+        }
+
         tr:hover td {
             background-color: #f1f1f1;
         }
@@ -82,22 +142,22 @@
     
         /* Fix Table Layout */
         table {
-            width: 100%;
+            width: 80%;
             display: table;  /* Ensure it's a table, not a grid */
         }
     
-        th:nth-child(1), td:nth-child(1) { width: 8vw; }
-        th:nth-child(2), td:nth-child(2) { width: 6vw; }
-        th:nth-child(3), td:nth-child(3) { width: 6vw; }
-        th:nth-child(4), td:nth-child(4) { width: 6vw; }
-        th:nth-child(5), td:nth-child(5) { width: 6vw; }
-        th:nth-child(6), td:nth-child(6) { width: 6vw; }
-        th:nth-child(7), td:nth-child(7) { width: 6vw; }
-        th:nth-child(8), td:nth-child(8) { width: 6vw; }
-        th:nth-child(9), td:nth-child(9) { width: 4vw; }
-        th:nth-child(10), td:nth-child(10) { width: 6vw; }
-        th:nth-child(11), td:nth-child(11) { width: 8svw; }
-        th:nth-child(12), td:nth-child(12) { width: 5vw; }
+        th:nth-child(1), td:nth-child(1) { width: 4vw; }
+        th:nth-child(2), td:nth-child(2) { width: 2.25vw; }
+        th:nth-child(3), td:nth-child(3) { width: 2.25vw; }
+        th:nth-child(4), td:nth-child(4) { width: 2.25vw; }
+        th:nth-child(5), td:nth-child(5) { width: 2.25vw; }
+        th:nth-child(6), td:nth-child(6) { width: 2.25vw; }
+        th:nth-child(7), td:nth-child(7) { width: 2.25vw; }
+        th:nth-child(8), td:nth-child(8) { width: 2.25vw; }
+        th:nth-child(9), td:nth-child(9) { width: 1.75vw; }
+        th:nth-child(10), td:nth-child(10) { width: 1.75vw; }
+        th:nth-child(11), td:nth-child(11) { width: 2vw; }
+        th:nth-child(12), td:nth-child(12) { width: 1.75vw; }
     
         /* Ensure delete button has proper alignment */
         .delete-btn {
@@ -146,9 +206,9 @@
         }
 
         #nextBtn {
-            position: absolute;
-            bottom: -2vh;
-            left: 175vb;
+            position: relative;
+            top: -11.75vh;
+            left: 162.25vb;
             width: 30vb;
             background-color: #4CAF50;
             color: white;
@@ -159,8 +219,8 @@
 
         #addBtn {
             position: relative;
-            top: -2vh;
-            /*left: 175vb;*/
+            top: 0vh;
+            left: 21vb;
             width: 30vb;
             background-color: #4CAF50;
             color: white;
@@ -255,7 +315,7 @@
 
 <button id="addBtn" onclick="addRow()">Add New Item</button>
 <br>
-<label id="images">◘Rotate 90°<br>
+<!-- <label id="images">◘Rotate 90°<br>
     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGYSURBVGhD7ZFRbsMwDEN7s/1u59yOszt1AkQKnuI4WhxXK6oH/tSRSBG93Z+cKpBNFcimCmRTBbKpAtlUgWxeo8DtgSAyTBW4GkSGqQJXg8gwZwp8fnxdKJgSRIapAtOCKUFkmCowLZgSRIapAtOCKUFkmCowLZgSRIapAtOCKUFkmIOFt/dvEbyJu2BSMCWaiPgA/QLqYkbwJu6CScGUaKIdYDfs0Smw3YE3cRdMCqYEkQ3jGn6hOwpv4i6YFEwJIn/z6ALBMZUOG4hsGFwvLCwguPeuMEoQScbXC52F7Q68ibtgK5kREx0W3FcnDBFE7lyypfOXCW4Z3sRdsJXMqIPocEUHDIlz6WP6BRQ7oit3Ryu5o53Uy4R2ph1wQnyMUQED+eTwgq50135aE303EBnmfIGBZMYOVQ0W9ZOByDDLC+iK4GZM+EwQGWZhAR0W3FcnDBFEhllVQHHvXWGUIDLMwgLucU86bCAyzJkCS0FkmCpwNYgMUwWuBpFh/rzw36gC2VSBbKpANlUgmyqQTRXI5skL3O8/rVVqpn5yPVEAAAAASUVORK5CYII="
     width="150" height="150">
     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAF5SURBVHhe7ZhNTsMwFIRjTtM97GHZ3gF2HIsd3KEsYQ97blNwmKdaUeLail07mvmkarxp9N7nn8hxpz8GYm6QtEgAkhYJQNIiAUhaJABJiwQgaZEAJC2rb4POOYz6ILcdbQEkLRKApKXKIfh6eMOoLk/HR4zO6BDMRAKQtEgAkhYJQNIiAUhaJACZzcPhe/z1Rm5dyXeB6UM/jrdj9noXCOu1Wue4KMAetPSQLVyGfA9L9SdtgZjBLeDrX9oWFwXE/lwSP5tzM1qb5BVQU0KLxo3kt4BJKCkinPX7/deYNYjVnPUa9BJKiQgbr9W81Wl1z7Hqk1iKhGf3g9E/4XKfNv75fpf0Bnk57TCKs9R0SPVvgmGxvkHP2hk3qXNnR247V/8oGtvzqSvAKCEg6wwogTXom7UV0ZKrC/B4Cb2IaCLAmIpoQVMBhkloQZVDsCXdH4K9IQFIWugFrD4Et462AJIWCUDSIgFIWiQASYsEIGmRACQt5AKG4RcJzbBXRHSImAAAAABJRU5ErkJggg=="
@@ -268,7 +328,7 @@
     width="150" height="150">
     <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAFZSURBVHhe7ZhBbsIwFERjTtN9u6fLcge667G6gzvAst23e25D+dVEQOpAHOz405knfY2xFIk/sceRw/5AQ8wMSosMgNIiA6C0VDHgefH9Wy6wY3BK5i9fGJ2Pa1F1C3xsHquvhEkNsGataU/Qh+BkGXBpv9fMAh2DUFqSDQghjKpLz35un6LzQ+pWFILIgsHYI6llIRebz1G3ogyA0pJ8JRYLntVijVGc9/1D8xZ2+DWe180SoyOJf/8P2gJQWpQBuTMgtk/7uJYdXe4qAw5nf295IrsB7Vu1z9sY7Xzq2y9FkRXQZ4K35o1iW6BrgsfmjaKnQNcEb80bRQ0w2qY9Nm8UN8DwlvynTGKAZ2QAlBYZAKVFBkBpkQHQouS4DyyFVgCUFhkApYXegCy3wjVxeyt8L8gAKC0KwdQQ/G9oC0BpkQFQWmQAlBYZAKVFBkBpkQFQWsgNaJofYVvnhvSQNZ0AAAAASUVORK5CYII="
     width="150" height="150">
-</label><br>
+</label><br> -->
 
 
 
