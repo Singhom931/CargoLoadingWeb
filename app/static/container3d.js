@@ -667,3 +667,30 @@ truck.position.set(0, -3, -12.5);
 ground.visible = false
 scene.background = white;
 fetchContainerData();
+
+function handleSplitClick(event, button) {
+    // const button = event.g;
+    const clickX = event.offsetX;
+    const width = button.offsetWidth;
+
+    // // Flash overlay
+    const flash = document.createElement("div");
+    flash.className = "click-flash";
+    flash.style.left = (clickX < width / 2) ? "0" : "50%";
+    button.appendChild(flash);
+    setTimeout(() => button.removeChild(flash), 200);
+
+    // console.log(clickX)
+    // console.log(width)
+    if (clickX < width / 2) {
+        show_hide_default_table();
+    } else {
+        addRow();
+    }
+}
+
+var default_table_state = "show"
+function show_hide_default_table(){
+    if (default_table_state==="show"){document.getElementById("defaultcontainersTable").style.display = "none";default_table_state = "hide"}
+    else if (default_table_state==="hide"){document.getElementById("defaultcontainersTable").style.display = "block";default_table_state = "show";document.getElementById("defaultcontainersTable").style.display = "table";}
+}

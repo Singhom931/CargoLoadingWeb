@@ -201,10 +201,10 @@
     }
 
     #backBtn {
-      position: absolute;
-      bottom: -2vh;
-      left: 140vb;
-      width: 30vb;
+      position: relative;
+      top: 0%;
+      left: 10%;
+      width: 15%;
       background-color: #4CAF50;
       color: white;
       padding: 10px 10px;
@@ -213,10 +213,10 @@
   }
 
     #nextBtn {
-        position: absolute;
-        bottom: -2vh;
-        left: 175vb;
-        width: 30vb;
+        position: relative;
+        top: 0%;
+        left: 60%;
+        width: 15%;
         background-color: #4CAF50;
         color: white;
         padding: 10px 10px;
@@ -305,11 +305,44 @@
       </tbody>
     </table>
 
-    <button id="addBtn" onclick="addRow()">Add Containers From Below Table ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎  OR ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎  Click here to Add Blank Row</Table></button>
-
     <button id="backBtn" onclick="window.history.back()">Back</button>
 
     <button type="submit" id="nextBtn" onclick="window.location.href='load_output';submitContainer()">Next</button>
+    <style>
+      .split-text-button {
+      display: flex;
+      width: 100%;
+      height: 60px;
+      /* background-color: #2c3e50; */
+      color: white;
+      border: none;
+      border-radius: 10px;
+      /* overflow: hidden; */
+      cursor: pointer;
+      font-family: sans-serif;
+      pointer-events: none;
+    }
+      .split-half {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      text-align: center;
+      font-size: 24px;
+      transition: background 0.2s;
+      border: 4px solid rgba(255, 255, 255, 0.75);
+      pointer-events: none;
+    }
+    .split-half:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    .split-half:first-child{
+      margin-right: 20px
+    }
+
+    </style>
+    <button id="addBtn" onclick="handleSplitClick(event, this)"><div style="font-size: 26px; font-weight: bold;margin-top: 7.5px; margin-bottom: 12.5px; pointer-events: none;">Add Containers From Below Table</div><div class="split-text-button" style="font-size: 24px; font-weight: normal; opacity: 0.8;"> <div class="split-half">Click Here to Show/Hide Below Table</div><div class="split-half">Click here to Add Blank Row To Above Table</div></div></button>
 
     <button id="playBtn">Play</button>
 
@@ -330,7 +363,30 @@
       </tbody>
     </table>
     <script>
-      const data_ = [["Container - 20' DC", 589.8, 235.2, 239.3, 28200],];
+      const data_ = [
+        ["Container - 20' DC", 589.8, 235.2, 239.3, 28200],
+        ["Container - 20' HC Pallet Wide", 590, 243, 269, 28000],
+        ["Container - 20' Reefer", 545.1, 229, 225.4, 27490],
+        ["Container - 40' DC", 1203.5, 235.2, 239.3, 28800],
+        ["Container - 40' HC", 1203.5, 235.2, 269.5, 28620],
+        ["Container - 40' HC Pallet Wide", 1210, 243, 269, 29370],
+        ["Container - 40' HC Reefer", 1157.7, 229, 249.8, 28350],
+        ["Container - 40' Reefer", 1157.7, 229, 225.4, 28600],
+        ["Container - 45' HC", 1355.6, 235.2, 269.5, 27600],
+        ["Container - 45' HC Pallet Wide", 1355, 243, 269, 29140],
+        ["Pallet - EPAL CP5 (76x114cm)", 114, 76, 200, 1000],
+        ["Pallet - EU - EPAL 1 (120x80cm)", 120, 80, 200, 1500],
+        ["Pallet - EU - EPAL 2 (120x100cm)", 120, 100, 200, 1250],
+        ["Pallet - EU - EPAL 6 (80x60cm)", 60, 80, 200, 1300],
+        ["Pallet - US Standard", 121.921, 101.602, 203.202, 1133.981],
+        ["Truck - America 28' Trailer", 830.583, 251.463, 279.403, 6123.497],
+        ["Truck - America 48' Trailer", 1440.184, 251.463, 279.403, 6123.497],
+        ["Truck - America 53' Trailer", 1600.205, 251.463, 279.403, 20411.657],
+        ["Truck - Europe 13,6 Trailer - Curtain Mega", 1362, 248, 294, 32800],
+        ["Truck - Europe 13,6 Trailer - Curtain Standard", 1362, 248, 270, 32800],
+        ["Air - P6P/PMC pallet", 317.5, 242.8, 163, 6804]
+      ]
+
       const data = data_.map(([name, l, w, h, w_cap]) => [name, l, w, h, l * w * h, w_cap]);
 
 
