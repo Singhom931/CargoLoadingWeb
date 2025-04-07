@@ -12,7 +12,23 @@ def index():
 @main.route('/guest')
 def guest():
     session['email'] = "guest"
-    return redirect(url_for('main.reference'))
+    return redirect(url_for('main.tools'))
+
+@main.route('/tools', methods=['GET', 'POST'])
+def tools():
+    if request.method == 'POST':
+        tool = request.form.get("tool")
+        valid_tools = {
+        "world-map": "world-map.html",
+        "3d-load": redirect(url_for('main.reference')),
+        "co2": "co2.html",
+        "sea-route": "sea-route.html",
+        "road-route": "road-route.html"
+        }
+        if tool in valid_tools:
+            return valid_tools[tool]
+    
+    return render_template('main/tools.html')
 
 @main.route('/reference', methods=['GET', 'POST'])
 def reference():

@@ -38,14 +38,25 @@
     table {
         /*background:  linear-gradient(90deg, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d, #90276d, #54096d);
         */
-        background:  linear-gradient(0deg, #90276d, #54096d, #90276d);
         width: 100%;
         border-collapse: collapse;
         margin: 0 auto;
         table-layout: fixed; /* Ensures fixed column layout */
-        background-color: #fff;
+        /* background-color: #ddd; */
+        backdrop-filter: blur(6px); /* blurs the 3D canvas behind */
+        -webkit-backdrop-filter: blur(6px);
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         /*z-index: 1;*/
+        }
+        
+    thead{
+        background:  linear-gradient(0deg, #90276d, #81206D, #90276d);
+
+    }
+
+    tbody {
+        background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent rows */
+        color: #000;
     }
 
     th, td {
@@ -62,8 +73,57 @@
     }
 
     td {
-        background-color: #f9f9f9;
-        font-size: 1rem;
+      transition: background-color 0.3s ease;
+      /* background-color: #f9f9f9; */
+      font-size: 1rem;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    td, th {
+    padding: 4px 6px;
+    text-align: center;
+    vertical-align: middle;
+    }
+
+    td input,
+    td select,
+    td label {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    padding: 2px;
+    font: inherit;
+    box-sizing: border-box;
+    text-align: center;
+    }
+
+    td input:focus {
+    outline: none;
+    background-color: #eef; /* optional focus style */
+    }
+
+    td input[type="color"] {
+    padding: 0;
+    width: 100%;
+    height: 30px;
+    border: none;
+    }
+
+    td input[type="checkbox"] {
+    transform: scale(1.2);
+    margin: 0 auto;
+    display: block;
+    }
+
+    td label {
+    display: block;
+    font-size: 0.8em;
     }
 
     tr:hover td {
@@ -82,17 +142,17 @@
 
     /* Fix Table Layout */
     table {
-        width: 100%;
+        width: 80%;
         display: table;  /* Ensure it's a table, not a grid */
     }
 
-    th:nth-child(1), td:nth-child(1) { width: 13.25vw; }
-    th:nth-child(2), td:nth-child(2) { width: 13.25vw; }
-    th:nth-child(3), td:nth-child(3) { width: 13.25vw; }
-    th:nth-child(4), td:nth-child(4) { width: 13.25vw; }
-    th:nth-child(5), td:nth-child(5) { width: 13.25vw; }
-    th:nth-child(6), td:nth-child(6) { width: 13.25vw; }
-    /*th:nth-child(7), td:nth-child(7) { width: 10vw; }*/
+    th:nth-child(1), td:nth-child(1) { width: 4vw; }
+    th:nth-child(2), td:nth-child(2) { width: 2.25vw; }
+    th:nth-child(3), td:nth-child(3) { width: 2.25vw; }
+    th:nth-child(4), td:nth-child(4) { width: 2.25vw; }
+    th:nth-child(5), td:nth-child(5) { width: 2.25vw; }
+    th:nth-child(6), td:nth-child(6) { width: 2.25vw; }
+    th:nth-child(7), td:nth-child(7) { width: 1.75vw; }
 
     /* Ensure delete button has proper alignment */
     .delete-btn {
@@ -166,9 +226,10 @@
 
     #addBtn {
         position: relative;
-        top: -2vh;
-        /*left: 175vb;*/
-        width: 35vb;
+        top: 0vh;
+        left: 10%;
+        width: 80%;
+        margin-bottom: 0.1%rem;
         background-color: #4CAF50;
         color: white;
         padding: 10px 20px;
@@ -183,7 +244,9 @@
         width: 100%;
         height: 100%;
         z-index: -1;
+        /* filter: blur(3px); */
     }
+
     #container-form {
         position: fixed;
         top: 20px;
@@ -237,18 +300,46 @@
           <th>‎ ‎ ‎ Actions</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="main-table">
         <!-- Rows will be added here dynamically -->
       </tbody>
     </table>
 
-    <button id="addBtn" onclick="addRow()">Add New Container</button>
+    <button id="addBtn" onclick="addRow()">Add Containers From Below Table ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎  OR ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎ ‎  Click here to Add Blank Row</Table></button>
 
     <button id="backBtn" onclick="window.history.back()">Back</button>
 
     <button type="submit" id="nextBtn" onclick="window.location.href='load_output';submitContainer()">Next</button>
 
     <button id="playBtn">Play</button>
+
+    <table id="defaultcontainersTable" border="2">
+      <thead>
+        <tr>
+          <th>Container Name</th>
+          <th>Length (cm)</th>
+          <th>Width (cm)</th>
+          <th>Height (cm)</th>
+          <th>Volume (cm³)</th>
+          <th>Weight Capacity (kg)</th>
+          <th>‎ ‎ ‎ Actions</th>
+        </tr>
+      </thead>
+      <tbody id="default-containers">
+        
+      </tbody>
+    </table>
+    <script>
+      const data_ = [["Container - 20' DC", 589.8, 235.2, 239.3, 28200],];
+      const data = data_.map(([name, l, w, h, w_cap]) => [name, l, w, h, l * w * h, w_cap]);
+
+
+      const tbody = document.getElementById('default-containers');
+
+      data.forEach(r => tbody.innerHTML += `<tr>${r.map(v =>
+        `<td><input type="text" size="20" value="${v}" readonly></td>`
+      ).join('')}<td><span class="addRow-btn" onclick="addRowtoTable(this)">‎ ‎ ‎ ‎ ‎ ‎ ➕</span></td></tr>`);
+    </script>
 
     <!-- <script src="{{ url_for('static', filename='container.js') }}"></script> -->
     <script src="{{ url_for('static', filename='container3d.js') }}"></script>

@@ -32,6 +32,27 @@ function addRow() {
     tableBody.appendChild(row);
 }
 
+function addRowtoTable(el) {
+    const row = el.closest('tr');
+    const values = Array.from(row.querySelectorAll('input')).map(input => input.value);
+
+    const main_row = document.createElement('tr');
+    main_row.innerHTML = `
+        <td><input type="text" placeholder="Container Name" value="${values[0]}" size="20" required></td>
+        <td><input type="text" placeholder="Length (cm)" oninput="calculateRow(this);" value=${values[1]} size="20" required></td>
+        <td><input type="text" placeholder="Width (cm)" oninput="calculateRow(this);" value=${values[2]} size="20" required></td>
+        <td><input type="text" placeholder="Height (cm)" oninput="calculateRow(this);" value=${values[3]} size="20" required></td>
+        <td><input type="text" placeholder="Volume" value=${values[4]} size="20" readonly></td>
+        <td><input type="text" placeholder="Weight\nCapacity (kg)" oninput="calculateRow(this);" value=${values[5]} size="20" required></td>
+        <td><span class="delete-btn" onclick="deleteRow(this)">‎ ‎ ‎ ❌</span></td>
+    `;
+    
+    // document.getElementById('main-table').innerHTML += newRowHTML;
+    document.getElementById('main-table').appendChild(main_row);
+
+    console.log(values);
+}
+
 // Function to delete a specific row
 function deleteRow(deleteBtn) {
     // Find the row containing the delete button and remove it
@@ -107,7 +128,7 @@ function populateContainerTable(containerItems,clear=true) {
             <td><input type="text" value="${container.height}" size="13"required></td>
             <td><input type="text" value="${(container.length * container.width * container.height).toFixed(2)}" size="13" readonly></td>
             <td><input type="text" value="${container.max_weight}" size="13" required></td>
-            <td><span class="delete-btn" onclick="deleteRow(this)">‎ ‎ ‎ ‎ ‎ ‎ ❌</span></td>
+            <td><span class="delete-btn" onclick="deleteRow(this)">‎ ‎ ‎ ❌</span></td>
         `;
         
         tableBody.appendChild(row);
@@ -385,7 +406,24 @@ let isTruckMoving = false;
 
 camera.position.z = 10;
 camera.position.y = 4;
-
+// Save initial position and rotation
+const defaultCameraState = {
+    position: camera.position.clone(),
+    rotation: camera.rotation.clone(),
+    fov: camera.fov,
+    aspect: camera.aspect,
+    near: camera.near,
+    far: camera.far
+};
+function resetCamera() {
+    camera.position.copy(defaultCameraState.position);
+    camera.rotation.copy(defaultCameraState.rotation);
+    camera.fov = defaultCameraState.fov;
+    camera.aspect = defaultCameraState.aspect;
+    camera.near = defaultCameraState.near;
+    camera.far = defaultCameraState.far;
+    camera.updateProjectionMatrix(); // Important!
+}
 // Function to create and update container model
 function updatecontainer() {
     const name = document.getElementById("container-name").value;
@@ -592,6 +630,7 @@ document.getElementById("playBtn").addEventListener("click", function() {
         speed = 100;
         document.getElementById("playBtn").textContent = "Stop";
         document.getElementById("containerTable").style.display = "none";
+        document.getElementById("defaultcontainersTable").style.display = "none";
         document.getElementById("addBtn").style.display = "none";
         document.getElementById("nextBtn").style.display = "none";
         document.getElementById("backBtn").style.display = "none";
@@ -601,22 +640,27 @@ document.getElementById("playBtn").addEventListener("click", function() {
         truck.rotation.set(0,-0.01,0)
         scene.background = texture;
         ground.visible = true
+        updatecontainer()
 
     } else {
         isPlaying = false;
         speed = 10;
         document.getElementById("playBtn").textContent = "Play";
         document.getElementById("containerTable").style.display = "block";
+        document.getElementById("defaultcontainersTable").style.display = "block";
         document.getElementById("addBtn").style.display = "block";
         document.getElementById("nextBtn").style.display = "block";
         document.getElementById("backBtn").style.display = "block";
         document.getElementById("containertitle").style.display = "block";
         document.getElementById("container-form").style.display = "none";
         truck.position.set(0, -3, -12.5);
-        camera.position.set(0,4,10)
+        // camera.position.set(0,4,10)
         scene.background = white;
         ground.visible = false
-
+        document.getElementById("containerTable").style.display = "table";
+        document.getElementById("defaultcontainersTable").style.display = "table";
+        scene.remove(containerItem);
+        resetCamera();
     }
 });
 truck.position.set(0, -3, -12.5);

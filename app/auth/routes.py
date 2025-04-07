@@ -23,7 +23,7 @@ def login():
             # Password is correct
             session['user_id'] = user.id  # Store user ID in session
             flash('Login successful!', 'success')
-            return redirect(url_for('main.reference'))
+            return redirect(url_for('main.tools'))
         else:
             flash('Invalid login credentials. Please try again.', 'danger')
     return render_template('auth/login.html')

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Individual 3D Tilt Cards</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #e6e9f0, #eef1f5);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 6vw;
+      width: 100%;
+      max-width: 1200px;
+      perspective: 1000px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      transition: transform 0.1s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+      transition: transform 0.1s ease, box-shadow 0.3s ease, filter 0.3s ease;
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      margin: 0;
+      background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: gradient-flow 4s infinite alternate;
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: #444;
+      margin-top: 0.5rem;
+      line-height: 1.4; 
+    }
+
+    @keyframes gradient-flow {
+      0% {
+        background-position: 0% 50%;
+      }
+      100% {
+        background-position: 100% 50%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <div class="grid-container">
+    <form class="card" method="POST" action="/tools"><input type="hidden" name="tool" value="world-map">
+      <h2>World Map of Ports</h2><br>
+      <p class="card-desc">Visualize global ports Across the World Including Dry Ports and Ocean Ports</p>
+    </form>
+    <form class="card" method="POST" action="/tools"><input type="hidden" name="tool" value="3d-load">
+      <h2>3D Load Calculator</h2><br>
+      <p class="card-desc">3D Cargo Loading for Planning and Visualization</p>
+    </form>
+    <form class="card" method="POST" action="/tools"><input type="hidden" name="tool" value="co2">
+      <h2>CO2 Estimator</h2><br>
+      <p class="card-desc">Estimate CO2 emission caused by Transportation.</p>
+    </form>
+    <form class="card" method="POST" action="/tools"><input type="hidden" name="tool" value="sea-route">
+      <h2>Sea Transport Route</h2><br>
+      <p class="card-desc">Plan optimal sea shipping routes.</p>
+    </form>
+    <form class="card" method="POST" action="/tools"><input type="hidden" name="tool" value="road-route">
+      <h2>Road Transport Route</h2><br>
+      <p class="card-desc">Generate efficient road transport paths.</p>
+    </form>
+  </div>
+
+  <script>
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        card.submit();
+      });
+    });
+  </script>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const gridSize = 30;
+
+    function drawGrid() {
+            ctx.fillStyle = "#eeeeee";
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                for (let y = 0; y < canvas.height; y += gridSize) {
+                    ctx.fillStyle = "#ddd";
+                    ctx.fillRect(x, y, gridSize - 1, gridSize - 1);   
+                }
+            } 
+        }
+
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGrid();
+    }
+
+    document.addEventListener('mousemove', (e) => {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            const rotateY = (mouseX - centerX) / 75;
+            const rotateX = -(mouseY - centerY) / 75;
+
+            canvas.style.transform = `perspective(800px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+        });
+
+    gameLoop();
+  </script>
+
+  <script>
+    const cards = document.querySelectorAll('.card');
+
+    document.addEventListener('mousemove', (e) => {
+      cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        const cardX = rect.left + rect.width / 2;
+        const cardY = rect.top + rect.height / 2;
+
+        const deltaX = e.clientX - cardX;
+        const deltaY = e.clientY - cardY;
+
+        const percentX = deltaX / (rect.width / 2);
+        const percentY = deltaY / (rect.height / 2);
+
+        const rotateY = percentX * 5;
+        const rotateX = -percentY * 5;
+
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+    });
+
+    document.addEventListener('mouseleave', () => {
+      cards.forEach(card => {
+        card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+      });
+    });
+
+    cards.forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      card.style.boxShadow = '0 15px 60px rgba(0, 0, 0, 0.35)';
+      card.style.filter = 'drop-shadow(0 0 5px rgba(200, 0, 255, 0.3))';
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.25)';
+      card.style.filter = 'none';
+    });
+  });
+  </script>
+</body>
+</html>
