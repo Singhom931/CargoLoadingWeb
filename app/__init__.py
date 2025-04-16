@@ -1,6 +1,8 @@
 from flask import Flask
 from .config import Config
 from .extensions import db , mail_smtp , mail_imap , cache
+import csv
+import os
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -27,5 +29,21 @@ def create_app(config_class=Config):
 
     from .payment import payment as payment_blueprint
     app.register_blueprint(payment_blueprint, url_prefix='/payment')
+
+    def load_ports_from_csv(filename):
+        locations = []
+        with open(filename, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                locations.append({
+                    "country": row["country"],
+                    "port": row["port_name"],
+                    "lat": float(row["latitude"]),
+                    "lng": float(row["longitude"]),
+                    "colour": row.get("colour", "blue")
+                })
+        return locations
+    csv_path = os.path.join(app.root_path, 'static', 'resources', 'ports.csv')
+    app.all_locations = load_ports_from_csv(csv_path)
 
     return app

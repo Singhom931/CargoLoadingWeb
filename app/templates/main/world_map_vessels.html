@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #map-container {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+    }
+
+    #map-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    #hide-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px; /* Adjust height as needed */
+    width: 100%;
+    background: #254881; /* or same as iframe bg */
+    z-index: 2;
+    /* pointer-events: none; So it doesn't block clicks */
+  }
+  </style>
+</head>
+<body>
+  
+  <div id="map-container" >
+    <div id="hide-header" style="text-align: center; color: white;">World Map with Live Vessels and Tracking</div>
+    <script>
+      (function () {
+        function isObject(obj) {
+          return obj != null && obj.constructor.name === "Object";
+        }
+
+        var obj = window.map_options_name && window.map_options_name !== "" && isObject(window[window.map_options_name])
+          ? window[window.map_options_name]
+          : window;
+
+        function parseBoolValue(value) {
+          if (value === undefined) return false;
+          if (value === "true" || value === true) return true;
+          return false;
+        }
+
+        // Force full width and height
+        obj.width = "100%";
+        obj.height = "100%";
+
+        if (obj.names === undefined) obj.names = false;
+        else obj.names = parseBoolValue(obj.names);
+
+        obj.show_track = parseBoolValue(obj.show_track);
+        obj.click_to_activate = parseBoolValue(obj.click_to_activate);
+
+        var f = typeof obj.fleet === "undefined" ? false : obj.fleet;
+        if (f !== false && f.indexOf("@") >= 0) f = false;
+
+        var fn = typeof obj.fleet_name === "undefined" ? false : encodeURIComponent(obj.fleet_name);
+        if (fn !== false && fn.indexOf("@") >= 0) fn = false;
+
+        if (obj.store_position === undefined) obj.store_position = true;
+        else obj.store_position = parseBoolValue(obj.store_position);
+
+        if (obj.mmsi !== undefined && parseInt(obj.mmsi) != obj.mmsi) obj.mmsi = undefined;
+        if (obj.imo !== undefined && parseInt(obj.imo) != obj.imo) obj.imo = undefined;
+        if (obj.latitude !== undefined && parseFloat(obj.latitude) != obj.latitude) obj.latitude = undefined;
+        if (obj.longitude !== undefined && parseFloat(obj.longitude) != obj.longitude) obj.longitude = undefined;
+
+        var rh = window.location.href;
+        if (rh.indexOf("file://") >= 0 || rh.indexOf("file%3A%2F%2F") >= 0) rh = "testingonly";
+        rh = encodeURIComponent(rh);
+
+        document.write(
+          '<iframe name="vesselfinder" id="vesselfinder"'
+          + ' width="' + obj.width + '"'
+          + ' height="' + obj.height + '"'
+          + ' frameborder="0"'
+          + ' src="https://www.vesselfinder.com/aismap?'
+          + 'zoom=' + (obj.zoom === undefined ? "undefined" : obj.zoom)
+          + (obj.latitude === undefined ? "&amp;lat=undefined" : "&amp;lat=" + obj.latitude)
+          + (obj.longitude === undefined ? "&amp;lon=undefined" : "&amp;lon=" + obj.longitude)
+          + "&amp;width=" + encodeURIComponent(obj.width)
+          + "&amp;height=" + encodeURIComponent(obj.height)
+          + "&amp;names=" + obj.names
+          + (obj.mmsi === undefined ? "" : "&amp;mmsi=" + obj.mmsi)
+          + (obj.imo === undefined ? "" : "&amp;imo=" + obj.imo)
+          + "&amp;track=" + obj.show_track
+          + (obj.fleet === undefined ? "&amp;fleet=false" : "&amp;fleet=" + f)
+          + (obj.fleet_name === undefined ? "&amp;fleet_name=false" : "&amp;fleet_name=" + fn)
+          + (obj.fleet_timespan !== undefined ? "&amp;fleet_timespan=" + obj.fleet_timespan : "")
+          + (obj.fleet_hide_old_positions === undefined
+            ? "&amp;fleet_hide_old_positions=false"
+            : "&amp;fleet_hide_old_positions=" + obj.fleet_hide_old_positions)
+          + "&amp;clicktoact=" + obj.click_to_activate
+          + "&amp;store_pos=" + obj.store_position
+          + (obj.fil === undefined ? "" : "&amp;fil=" + obj.fil)
+          + (obj.default_maptype === undefined ? "" : "&amp;default_maptype=" + obj.default_maptype)
+          + "&amp;ra=" + rh
+          + '">Browser does not support embedded objects.<br/>Visit directly <a href="https://www.vesselfinder.com" target="_blank">www.vesselfinder.com</a>'
+          + "</iframe>"
+        );
+      })();
+    </script>
+</body>
+</html>

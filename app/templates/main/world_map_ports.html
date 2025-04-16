@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+	html, body {
+		height: 100%;
+		margin: 0;
+		padding: 0;
+	}
+
+    #map { height: 100vh; width: 100%;margin: 0; }
+
+    .search-boxes {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      background: white;
+      z-index: 1;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+
+    select {
+      padding: 5px;
+      font-size: 16px;
+    }
+
+    .custom-marker {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 5px 10px;
+      text-align: center;
+      font-family: sans-serif;
+      font-size: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .country { font-size: 11px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="search-boxes">
+    <select id="countrySelect">
+      <option value="">Select Country</option>
+    </select>
+    <select id="portSelect" disabled>
+      <option value="">Select Port</option>
+    </select>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAp1DBQN_zl5xbHWxECa50MGR4IputFHgY"></script>
+  <script>
+    const locations = {{ locations_json | safe }}
+    let map;
+	const customMarkers = [];
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 20, lng: 0 },
+        zoom: 2,
+        mapTypeId: "satellite"
+      });
+
+      populateCountryDropdown();
+      setupDropdownHandlers();
+
+	  locations.forEach(loc => {
+		addCustomMarker(loc);
+	  });
+
+	  map.addListener("zoom_changed", handleZoomChange);
+	  handleZoomChange(); 
+
+	  map.setCenter({ lat: 0, lng: 80 });
+	  map.setZoom(3);
+	  
+    }
+
+    function populateCountryDropdown() {
+      const countrySelect = document.getElementById("countrySelect");
+      const countries = [...new Set(locations.map(loc => loc.country))];
+
+      countries.forEach(country => {
+        const option = document.createElement("option");
+        option.value = country;
+        option.textContent = country;
+        countrySelect.appendChild(option);
+      });
+    }
+
+    function setupDropdownHandlers() {
+      const countrySelect = document.getElementById("countrySelect");
+      const portSelect = document.getElementById("portSelect");
+
+      countrySelect.addEventListener("change", () => {
+        const selectedCountry = countrySelect.value;
+        portSelect.innerHTML = '<option value="">Select Port</option>';
+
+        if (!selectedCountry) {
+          portSelect.disabled = true;
+          return;
+        }
+
+        const ports = locations
+          .filter(loc => loc.country === selectedCountry)
+          .map(loc => loc.port);
+
+        ports.forEach(port => {
+          const option = document.createElement("option");
+          option.value = port;
+          option.textContent = port;
+          portSelect.appendChild(option);
+        });
+
+        portSelect.disabled = false;
+      });
+
+      portSelect.addEventListener("change", () => {
+        const selectedPort = portSelect.value;
+        const selectedCountry = countrySelect.value;
+        const loc = locations.find(l => l.country === selectedCountry && l.port === selectedPort);
+		map.setCenter({ lat: loc.lat, lng: loc.lng });
+      	map.setZoom(10);
+        
+      });
+    }
+
+	function handleZoomChange() {
+		const zoomLevel = map.getZoom();
+		const showMarkers = zoomLevel >= 7;
+
+		customMarkers.forEach(({ view, element }) => {
+			if (showMarkers) {
+			view.setMap(map);
+			} else {
+			view.setMap(null);
+			}
+		});
+	}
+
+
+    function addCustomMarker(loc) {
+      const markerDiv = document.createElement("div");
+      markerDiv.className = "custom-marker";
+      markerDiv.innerHTML = `
+        <div>${loc.port}</div>
+        <div class="country">${loc.country}</div>
+      `;
+
+      const customMarker = new google.maps.OverlayView();
+      customMarker.onAdd = function () {
+        this.getPanes().overlayMouseTarget.appendChild(markerDiv);
+      };
+      customMarker.draw = function () {
+        const projection = this.getProjection();
+        const pos = projection.fromLatLngToDivPixel(new google.maps.LatLng(loc.lat, loc.lng));
+        markerDiv.style.left = pos.x + "px";
+        markerDiv.style.top = pos.y + "px";
+        markerDiv.style.position = "absolute";
+        markerDiv.style.transform = "translate(-50%, -100%)";
+      };
+      customMarker.onRemove = function () {
+        markerDiv.remove();
+      };
+
+    //   map.setCenter({ lat: loc.lat, lng: loc.lng });
+    //   map.setZoom(8);
+    //   customMarker.setMap(map);
+	  customMarker.loc = loc;
+	  customMarkers.push({ view: customMarker, element: markerDiv });
+    }
+
+    window.onload = initMap;
+  </script>
+</body>
+</html>

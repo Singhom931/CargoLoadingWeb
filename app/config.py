@@ -19,4 +19,5 @@ class Config:
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = 'smtp931@gmail.com'
 
-
+    #Google Maps API
+    GOOGLE_MAPS = os.getenv('GOOGLE_MAPS')

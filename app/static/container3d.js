@@ -648,9 +648,9 @@ document.getElementById("playBtn").addEventListener("click", function() {
         document.getElementById("playBtn").textContent = "Play";
         document.getElementById("containerTable").style.display = "block";
         document.getElementById("defaultcontainersTable").style.display = "block";
-        document.getElementById("addBtn").style.display = "block";
-        document.getElementById("nextBtn").style.display = "block";
-        document.getElementById("backBtn").style.display = "block";
+        document.getElementById("addBtn").style.display = "inline-block";
+        document.getElementById("nextBtn").style.display = "inline-block";
+        document.getElementById("backBtn").style.display = "inline-block";
         document.getElementById("containertitle").style.display = "block";
         document.getElementById("container-form").style.display = "none";
         truck.position.set(0, -3, -12.5);

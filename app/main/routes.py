@@ -1,9 +1,8 @@
-from flask import render_template, redirect, url_for, flash, request, session, jsonify, copy_current_request_context
+from flask import current_app, render_template, redirect, url_for, flash, request, session, jsonify, copy_current_request_context
 from ..extensions import db, User, Reference, Container, Cargo, cache
 from . import main
 from .packer import Pack
 import json
-
 
 @main.route('/')
 def index():
@@ -14,14 +13,23 @@ def guest():
     session['email'] = "guest"
     return redirect(url_for('main.tools'))
 
+@main.route('/world_map_ports')
+def world_map_ports():
+    return render_template("main/world_map_ports.html", locations_json=current_app.all_locations)
+
+@main.route('/world_map_vessels')
+def world_map_vessels():
+    return render_template("main/world_map_vessels.html")
+
 @main.route('/tools', methods=['GET', 'POST'])
 def tools():
     if request.method == 'POST':
         tool = request.form.get("tool")
         valid_tools = {
-        "world-map": "world-map.html",
+        "world-map-ports": redirect(url_for('main.world_map_ports')),
         "3d-load": redirect(url_for('main.reference')),
         "co2": "co2.html",
+        "world-map-vessels": redirect(url_for('main.world_map_vessels')),
         "sea-route": "sea-route.html",
         "road-route": "road-route.html"
         }

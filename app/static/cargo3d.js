@@ -649,8 +649,8 @@ document.getElementById("playBtn").addEventListener("click", function() {
         speed = 10;
         document.getElementById("playBtn").textContent = "Play";
         document.getElementById("cargoTable").style.display = "block";
-        document.getElementById("addBtn").style.display = "block";
-        document.getElementById("nextBtn").style.display = "block";
+        document.getElementById("addBtn").style.display = "inline-block";
+        document.getElementById("nextBtn").style.display = "inline-block";
         document.getElementById("cargotitle").style.display = "block";
         document.getElementById("cargo-form").style.display = "none";
         truck.position.set(0, -3, -12.5);

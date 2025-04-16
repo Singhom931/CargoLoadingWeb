@@ -105,8 +105,8 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: auto 1fr 1fr 1fr;
-            top: 55vh;
-            right: 12vw;
+            top: 20%;
+            right: 5%;
             width: 200px;
             height: 300px;
             border: 3px solid #333;
@@ -197,6 +197,23 @@
                 {{ plot|safe }}
             </div>
         {% endfor %}
+        <!-- <div id="gravity-visual">
+            <div class="container">
+                <div class="title">Gravity Distribution Visualization</div>
+                <div class="quadrant" id="quadrant-1">
+                    <div class="gravity-value" id="gravity-1">0%</div>
+                </div>
+                <div class="quadrant" id="quadrant-2">
+                    <div class="gravity-value" id="gravity-2">0%</div>
+                </div>
+                <div class="quadrant" id="quadrant-3">
+                    <div class="gravity-value" id="gravity-3">0%</div>
+                </div>
+                <div class="quadrant" id="quadrant-4">
+                    <div class="gravity-value" id="gravity-4">0%</div>
+                </div>
+            </div>
+        </div> -->
         <div id = "usage-container">
         <!-- <div id="volume-usage">
             <div class="donut-chart">
@@ -227,24 +244,6 @@
         <!-- The img tag to display the animated frames -->
         <!-- <img id="animated-image" src="data:image/png;base64,{{ plots_list[0][0] }}" class="plot" alt="3D Plot" /> -->
     </div>
-    <div id="gravity-visual">
-        <div class="container">
-            <div class="title">Gravity Distribution Visualization</div>
-            <div class="quadrant" id="quadrant-1">
-                <div class="gravity-value" id="gravity-1">0%</div>
-            </div>
-            <div class="quadrant" id="quadrant-2">
-                <div class="gravity-value" id="gravity-2">0%</div>
-            </div>
-            <div class="quadrant" id="quadrant-3">
-                <div class="gravity-value" id="gravity-3">0%</div>
-            </div>
-            <div class="quadrant" id="quadrant-4">
-                <div class="gravity-value" id="gravity-4">0%</div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 
