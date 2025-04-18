@@ -47,7 +47,7 @@ def tools():
         "3d-load": redirect(url_for('main.reference')),
         "co2": "co2.html",
         "world-map-vessels": redirect(url_for('main.world_map_vessels')),
-        "sea-route": "sea-route.html",
+        "sea-route": redirect(url_for('main.sea_route.html')),
         "road-route": "road-route.html"
         }
         if tool in valid_tools:
