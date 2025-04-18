@@ -4,6 +4,8 @@ from . import main
 from .packer import Pack
 import json
 
+from searoute import searoute
+
 @main.route('/')
 def index():
     return render_template('main/home.html')
@@ -20,6 +22,30 @@ def world_map_ports():
 @main.route('/world_map_vessels')
 def world_map_vessels():
     return render_template("main/world_map_vessels.html")
+
+@main.route('/sea_route')
+def sea_route():
+    return render_template("main/sea_route.html", locations_json=current_app.all_locations)
+
+@main.route('/get_route', methods=['POST'])
+def get_route():
+    data = request.json
+    start = data['start']
+    end = data['end']
+
+    # Simulate a basic route with midpoint
+    route = searoute((start['lng'],start['lat']), (end['lng'],end['lat']))
+    points = route['geometry']['coordinates']
+    route = [{"lat": lat, "lng": lng} for lng, lat in points]
+    print(route)
+    # midpoint = {
+    #     "lat": (start['lat'] + end['lat']) / 2,
+    #     "lng": (start['lng'] + end['lng']) / 2
+    # }
+    # route = [start, midpoint, end]
+    # print(jsonify(route))
+
+    return jsonify(route)
 
 @main.route('/tools', methods=['GET', 'POST'])
 def tools():

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+      
+        #map {
+          height: 100vh;
+          width: 100%;
+        }
+      
+        .search-boxes {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          z-index: 5;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          background: rgba(255, 255, 255, 0.95);
+          padding: 12px 16px;
+          border-radius: 10px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+      
+        .selector-row {
+          display: flex;
+          gap: 20px;
+          flex-wrap: wrap;
+        }
+      
+        .selector-group {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+      
+        select {
+          padding: 6px;
+          font-size: 14px;
+          width: 160px;
+        }
+      
+        button {
+          padding: 8px 16px;
+          font-size: 14px;
+          background-color: #008CBA;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          align-self: flex-end;
+          transition: background-color 0.3s;
+        }
+      
+        button:hover {
+          background-color: #0077a8;
+        }
+    </style>
+      
+</head>
+<body>
+  <div class="search-boxes">
+    <div class="selector-group">
+      <select id="startCountry"><option value="">Start Country</option></select>
+      <select id="startPort" disabled><option value="">Start Port</option></select>
+    </div>
+
+    <div class="selector-group">
+      <select id="endCountry"><option value="">Destination Country</option></select>
+      <select id="endPort" disabled><option value="">Destination Port</option></select>
+    </div>
+
+    <button onclick="getRoute()">Show Route</button>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAp1DBQN_zl5xbHWxECa50MGR4IputFHgY"></script>
+  <script>
+    const locations = {{ locations_json | tojson }};
+    let map, routePolyline;
+    let routeMarkers = [];
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 10, lng: 80 },
+        zoom: 3,
+        mapTypeId: "satellite"
+      });
+
+      populateCountryDropdowns();
+      setupHandlers();
+    }
+
+    function populateCountryDropdowns() {
+      const countries = [...new Set(locations.map(loc => loc.country))];
+
+      const startCountry = document.getElementById("startCountry");
+      const endCountry = document.getElementById("endCountry");
+
+      countries.forEach(country => {
+        const opt1 = new Option(country, country);
+        const opt2 = new Option(country, country);
+        startCountry.appendChild(opt1);
+        endCountry.appendChild(opt2);
+      });
+    }
+
+    function setupHandlers() {
+      const startCountry = document.getElementById("startCountry");
+      const endCountry = document.getElementById("endCountry");
+
+      const startPort = document.getElementById("startPort");
+      const endPort = document.getElementById("endPort");
+
+      startCountry.addEventListener("change", () => {
+        const ports = locations.filter(loc => loc.country === startCountry.value);
+        startPort.innerHTML = '<option value="">Start Port</option>';
+        ports.forEach(p => {
+          startPort.appendChild(new Option(p.port, p.port));
+        });
+        startPort.disabled = ports.length === 0;
+      });
+
+      endCountry.addEventListener("change", () => {
+        const ports = locations.filter(loc => loc.country === endCountry.value);
+        endPort.innerHTML = '<option value="">Destination Port</option>';
+        ports.forEach(p => {
+          endPort.appendChild(new Option(p.port, p.port));
+        });
+        endPort.disabled = ports.length === 0;
+      });
+    }
+
+    async function getRoute() {
+      const startPort = document.getElementById("startPort").value;
+      const endPort = document.getElementById("endPort").value;
+      const startCountry = document.getElementById("startCountry").value;
+      const endCountry = document.getElementById("endCountry").value;
+
+      if (!startPort || !endPort || (startPort === endPort && startCountry === endCountry)) {
+        alert("Please select two different ports.");
+        return;
+      }
+
+      const start = locations.find(loc => loc.port === startPort && loc.country === startCountry);
+      const end = locations.find(loc => loc.port === endPort && loc.country === endCountry);
+
+      const res = await fetch('/get_route', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ start, end })
+      });
+
+      const route = await res.json();
+      drawRoute(route);
+    }
+
+    function drawRoute(route) {
+        if (routePolyline) routePolyline.setMap(null);
+        routeMarkers.forEach(marker => marker.setMap(null));
+        routeMarkers = [];
+
+        const path = route.map(pt => new google.maps.LatLng(pt.lat, pt.lng));
+
+        // Draw polyline
+        routePolyline = new google.maps.Polyline({
+            path,
+            geodesic: true,
+            strokeColor: "#00FFFF",
+            strokeOpacity: 0.8,
+            strokeWeight: 4
+        });
+        routePolyline.setMap(map);
+
+        // Only place markers at start and end
+        const labels = [
+            {
+            ...route[0],
+            title: `${document.getElementById("startPort").value}`,
+            subtitle: `${document.getElementById("startCountry").value}`
+            },
+            {
+            ...route[route.length - 1],
+            title: `${document.getElementById("endPort").value}`,
+            subtitle: `${document.getElementById("endCountry").value}`
+            }
+        ];
+
+        labels.forEach(loc => {
+            const marker = new google.maps.Marker({
+                position: { lat: loc.lat, lng: loc.lng },
+                map,
+            });
+
+            // Create a custom label div
+            const labelDiv = document.createElement("div");
+            labelDiv.innerHTML = `
+                <div style="
+                background: white;
+                padding: 6px 10px;
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                font-size: 14px;
+                text-align: center;
+                ">
+                <div style="font-weight: bold;">${loc.title}</div>
+                <div style="font-size: 12px; color: #555;">${loc.subtitle}</div>
+                </div>
+            `;
+
+            // Use OverlayView to position it like a tooltip
+            const CustomLabel = function (position, content) {
+                this.position = position;
+                this.content = content;
+                this.div = null;
+            };
+
+            CustomLabel.prototype = new google.maps.OverlayView();
+            CustomLabel.prototype.onAdd = function () {
+                const panes = this.getPanes();
+                this.div = this.content;
+                panes.overlayImage.appendChild(this.div);
+            };
+            CustomLabel.prototype.draw = function () {
+                const overlayProjection = this.getProjection();
+                const pos = overlayProjection.fromLatLngToDivPixel(this.position);
+                if (this.div) {
+                this.div.style.position = "absolute";
+                this.div.style.left = pos.x + "px";
+                this.div.style.top = (pos.y - 40) + "px";
+                }
+            };
+            CustomLabel.prototype.onRemove = function () {
+                if (this.div) {
+                this.div.parentNode.removeChild(this.div);
+                this.div = null;
+                }
+            };
+
+            const label = new CustomLabel(new google.maps.LatLng(loc.lat, loc.lng), labelDiv);
+            label.setMap(map);
+
+            routeMarkers.push(marker);
+        });
+
+        const bounds = new google.maps.LatLngBounds();
+        path.forEach(p => bounds.extend(p));
+        map.fitBounds(bounds);
+    }
+
+    window.onload = initMap;
+  </script>
+</body>
+</html>
