@@ -33,18 +33,9 @@ def get_route():
     start = data['start']
     end = data['end']
 
-    # Simulate a basic route with midpoint
     route = searoute((start['lng'],start['lat']), (end['lng'],end['lat']))
     points = route['geometry']['coordinates']
     route = [{"lat": lat, "lng": lng} for lng, lat in points]
-    print(route)
-    # midpoint = {
-    #     "lat": (start['lat'] + end['lat']) / 2,
-    #     "lng": (start['lng'] + end['lng']) / 2
-    # }
-    # route = [start, midpoint, end]
-    # print(jsonify(route))
-
     return jsonify(route)
 
 @main.route('/tools', methods=['GET', 'POST'])
