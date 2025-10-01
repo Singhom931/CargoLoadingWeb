@@ -107,7 +107,7 @@
 <body>
     <!-- Place iframe in the background -->
     <!-- <iframe id='gameCanvas' src="{{ url_for('main.wham') }}"></iframe> -->
-    <video autoplay muted loop src="{{ url_for('static', filename='resources/background.mp4') }}" type="video/mp4"> </video>
+    <video autoplay muted loop src="{{ url_for('static', filename='resources/background.mp4') }}" preload="auto" type="video/mp4"> </video>
 
     <div class="register-container">
         <h1>Register</h1>
