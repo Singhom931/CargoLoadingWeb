@@ -27,6 +27,14 @@ def world_map_vessels():
 def sea_route():
     return render_template("main/sea_route.html", locations_json=current_app.all_locations)
 
+@main.route('/road_route')
+def road_route():
+    return render_template("main/road_route.html")
+
+@main.route('/co2_estimator')
+def co2_estimator():
+    return render_template("main/co2_estimator.html")
+
 @main.route('/get_route', methods=['POST'])
 def get_route():
     data = request.json
@@ -45,10 +53,10 @@ def tools():
         valid_tools = {
         "world-map-ports": redirect(url_for('main.world_map_ports')),
         "3d-load": redirect(url_for('main.reference')),
-        "co2": "co2.html",
+        "co2": redirect(url_for('main.co2_estimator')),
         "world-map-vessels": redirect(url_for('main.world_map_vessels')),
         "sea-route": redirect(url_for('main.sea_route')),
-        "road-route": "road-route.html"
+        "road-route": redirect(url_for('main.road_route'))
         }
         if tool in valid_tools:
             return valid_tools[tool]

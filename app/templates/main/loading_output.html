@@ -1,177 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Loading...</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- jQuery CDN -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; background-color: black; }
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            flex-direction: column;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loading...</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
-        .loading-text {
-            position: absolute;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            z-index: 100;
-            text-align: center;
-        }
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', sans-serif;
+        background-color: #f5f6f8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: #333;
+    }
 
-        .cube-container {
-            position: relative;
-        }
-    </style>
+    #loading-screen {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        width: 400px;
+    }
+
+    .logo {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #1f2937;
+        letter-spacing: 1px;
+    }
+
+    .loader-circle {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #d1d5db;
+        border-top-color: #2563eb; /* subtle accent */
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .progress-container {
+        width: 100%;
+        height: 12px;
+        background-color: #e5e7eb;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background-color: #2563eb;
+        border-radius: 6px;
+        transition: width 0.3s ease;
+    }
+
+    .loading-text {
+        font-size: 15px;
+        color: #4b5563;
+        text-align: center;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
 </head>
 <body>
 
 <div id="loading-screen">
-    <div id="loading-text" class="loading-text">Finding the most optimal solution...</div>
-    <div class="cube-container"></div>
+    <div class="logo">Truck CO₂ Estimator</div>
+    <div class="loader-circle"></div>
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="loading-text" id="loading-text">Preparing data...</div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Scene setup
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    var renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.querySelector('.cube-container').appendChild(renderer.domElement);
-
-    // Lights
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Soft white light
-    scene.add(ambientLight);
-
-    var pointLight = new THREE.PointLight(0xffffff, 1, 100); // Bright white point light
-    pointLight.position.set(5, 5, 5); // Position above the scene
-    scene.add(pointLight);
-
-    // Center spinning cube
-    var geometry = new THREE.BoxGeometry(4, 4, 4); // Larger cube for the center
-    var material = new THREE.MeshPhongMaterial({
-        color: 0xFF0000,       // Red color
-        emissive: 0x550000,    // Glow-like red emission
-        shininess: 100,        // Makes it shiny
-        wireframe: true        // Wireframe appearance
-    });
-    var centerCube = new THREE.Mesh(geometry, material);
-    centerCube.position.set(0,0,-5)
-    scene.add(centerCube);
-
-    // Falling cubes
-    var fallingCubes = [];
-    var cubeGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00, emissive: 0x003300 });
-
-    function createFallingCube() {
-        var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-
-        // Randomize initial position and rotation
-        cube.position.set(
-            (Math.random() - 0.5) * 10, // Random X position
-            Math.random() * 5 + 5,    // Random Y position above camera
-            (Math.random() - 0.5) * 10  // Random Z position
-        );
-
-        cube.rotation.set(
-            Math.random() * Math.PI,    // Random X rotation
-            Math.random() * Math.PI,    // Random Y rotation
-            Math.random() * Math.PI     // Random Z rotation
-        );
-
-        // Store random falling speed and spin
-        cube.userData = {
-            speed: 0.05 + Math.random() * 0.05, // Falling speed
-            spinX: Math.random() * 0.05,       // Spin speed X
-            spinY: Math.random() * 0.05        // Spin speed Y
-        };
-
-        fallingCubes.push(cube);
-        scene.add(cube);
-    }
-
-    // Start generating falling cubes gradually
-    setInterval(() => {
-        for (let i = 0; i < 5; i++) {
-            createFallingCube();
-        }
-    }, 250); // 5 cubes every 250ms
-
-    // Loading text rotation
-    var loadingTexts = [
-        "Calculating all Possible Combinations...",
-        "Removing Potentially Unstable Solutions...",
-        "Finding the Most Optimal Solution...",
-        "Calculating Gravity Distribution...",
-        "Generating 3D plots...",
-        "Colouring and Labeling Items, Adding Visibility Toggles...",
-        "Loading up 3D plots and animations...",
-        "Almost there..."
+    const loadingTexts = [
+        "Preparing data...",
+        "Calculating fuel consumption...",
+        "Estimating CO₂ emissions...",
+        "Optimizing routes...",
+        "Almost done..."
     ];
 
-    var currentIndex = 0;
-    var loadingTextElement = document.getElementById("loading-text");
+    const progressBar = document.getElementById('progress-bar');
+    const loadingText = document.getElementById('loading-text');
 
-    setInterval(function() {
-        if (currentIndex < loadingTexts.length - 1) {
-            currentIndex++;
-            loadingTextElement.textContent = loadingTexts[currentIndex];
-        }
-    }, 4000);
+    let textIndex = 0;
+    let fakeProgress = 0;
 
-    // Animate the scene
-    function animate() {
-        requestAnimationFrame(animate);
+    // Rotate loading text
+    setInterval(() => {
+        textIndex = (textIndex + 1) % loadingTexts.length;
+        loadingText.textContent = loadingTexts[textIndex];
+    }, 2500);
 
-        // Rotate the center cube
-        centerCube.rotation.x += 0.02;
-        centerCube.rotation.y += 0.02;
-
-        // Animate falling cubes
-        fallingCubes.forEach(cube => {
-            cube.position.y -= cube.userData.speed; // Fall speed
-            cube.rotation.x += cube.userData.spinX; // Spin X
-            cube.rotation.y += cube.userData.spinY; // Spin Y
-
-            // Remove cubes when they fall out of view
-            if (cube.position.y < -10) {
-                scene.remove(cube);
-                fallingCubes = fallingCubes.filter(c => c !== cube);
-            }
-        });
-
-        renderer.render(scene, camera);
-    }
-
-    animate();
-
-    // Check task completion from server
-    $(document).ready(function() {
-        function checkTaskStatus() {
-            $.get('/check_output_status', function(response) {
+    // Poll server for task completion
+    function checkTaskStatus() {
+        $.ajax({
+            url: '/check_output_status',
+            method: 'GET',
+            success: function(response) {
                 if (response.status === 'complete') {
-                    window.location.href = '/output';
+                    progressBar.style.width = "100%";
+                    setTimeout(() => {
+                        window.location.href = '/output';
+                    }, 400);
                 } else {
-                    // Task is still running, check again in 1 second
+                    if(fakeProgress < 95) {
+                        fakeProgress += Math.random() * 1.5;
+                        if(fakeProgress > 95) fakeProgress = 95;
+                        progressBar.style.width = fakeProgress + "%";
+                    }
                     setTimeout(checkTaskStatus, 1000);
                 }
-            });
-        }
+            },
+            error: function() {
+                setTimeout(checkTaskStatus, 2000);
+            }
+        });
+    }
 
-        checkTaskStatus();
-    });
+    checkTaskStatus();
 </script>
 
 </body>

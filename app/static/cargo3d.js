@@ -647,7 +647,7 @@ document.getElementById("playBtn").addEventListener("click", function() {
     } else {
         isPlaying = false;
         speed = 10;
-        document.getElementById("playBtn").textContent = "Play";
+        document.getElementById("playBtn").textContent = "3D Mode";
         document.getElementById("cargoTable").style.display = "block";
         document.getElementById("addBtn").style.display = "inline-block";
         document.getElementById("nextBtn").style.display = "inline-block";

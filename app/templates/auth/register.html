@@ -17,21 +17,19 @@
             color: black;
         }
 
-        iframe {
+        video {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-
-            /*transform: translate(-172%,-50%);
-            /*z-index: -1; /* Move iframe to the background */
-            border: none;
+            object-fit: cover;     /* ensures it fills without distortion */
+            z-index: -1;
         }
 
         .register-container {
             z-index: 1;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(15px);
             padding: 30px;
             border-radius: 15px;
@@ -39,13 +37,17 @@
             max-width: 400px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
-            color: white;
+            color: #333;
         }
 
         h1 {
             font-size: 2.5em;
             margin-bottom: 20px;
-            color: white;
+            background: #7567f7;/*linear-gradient(90deg, #5395eb, #56a7f3, #75bbfd);*/
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient-flow 4s infinite alternate;
         }
 
         input[type="email"], input[type="password"] {
@@ -65,8 +67,9 @@
             margin: 20px 0;
             border: none;
             border-radius: 8px;
-            background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+            background: linear-gradient(90deg, #5395eb, #56a7f3, #75bbfd);
             color: white;
+            opacity: 10;
             font-size: 1.2em;
             font-weight: bold;
             cursor: pointer;
@@ -74,7 +77,7 @@
         }
 
         button:hover {
-            background: linear-gradient(90deg, #e0109b, #c316da, #e0109b);
+            background: linear-gradient(90deg, #3e88e9, #1182ec, #3e88e9);
         }
 
         a {
@@ -103,7 +106,8 @@
 </head>
 <body>
     <!-- Place iframe in the background -->
-    <iframe id='gameCanvas' src="{{ url_for('main.wham') }}"></iframe>
+    <!-- <iframe id='gameCanvas' src="{{ url_for('main.wham') }}"></iframe> -->
+    <video autoplay muted loop src="{{ url_for('static', filename='resources/background.mp4') }}" type="video/mp4"> </video>
 
     <div class="register-container">
         <h1>Register</h1>
@@ -114,39 +118,6 @@
             <button type="submit">Register</button>
         </form>
     </div>
-    <button id="playBtn">Play</button>
-
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // Player setup and game logic
-        const player = { x: canvas.width / 2 - 25, y: canvas.height - 60, width: 50, height: 50, speed: 14 };
-        let isPlaying = false;
-
-        // Game loop and controls (you can adapt this as per your game logic)
-        document.getElementById("playBtn").addEventListener("click", function() {
-            if (!isPlaying) {
-                isPlaying = true;
-                document.querySelector(".register-container").style.display = "none";
-                document.getElementById("playBtn").textContent = "Stop";
-                // Add game start logic
-            } else {
-                isPlaying = false;
-                document.querySelector(".register-container").style.display = "block";
-                document.getElementById("playBtn").textContent = "Play";
-                // Add game stop logic
-            }
-        });
-
-        function gameLoop() {
-            // Game logic (draw elements)
-            requestAnimationFrame(gameLoop);
-        }
-
-        gameLoop();
-    </script>
     
 </body>
 </html>

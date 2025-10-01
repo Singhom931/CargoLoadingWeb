@@ -17,6 +17,20 @@
       overflow: hidden;
     }
 
+    video {
+            position: absolute;
+            top:  12.5%;
+            left: 12.5%;
+            width: 130%;
+            height: 130%;
+            top: -12.5%;
+            left: -12.5%;
+            /* transform: translate(-50%, -50%); */
+            transform-origin: center; 
+            object-fit: cover;     /* ensures it fills without distortion */
+            z-index: -1;
+        }
+
     canvas {
             position: fixed;
             top: 0;
@@ -44,6 +58,7 @@
       will-change: transform;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
       transition: transform 0.1s ease, box-shadow 0.3s ease, filter 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.3); /* looks lighter & thinner */
     }
 
     .card h2 {
@@ -74,7 +89,9 @@
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
+  <!-- <canvas id="gameCanvas"></canvas> -->
+  <video id="Video" autoplay muted loop src="{{ url_for('static', filename='resources/background2.mp4') }}" type="video/mp4" > </video>
+
 
   <div class="grid-container">
     <form class="card" method="POST" action="/tools"><input type="hidden" name="tool" value="world-map-ports">
@@ -112,41 +129,19 @@
   </script>
 
   <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const gridSize = 30;
-
-    function drawGrid() {
-            ctx.fillStyle = "#eeeeee";
-            for (let x = 0; x < canvas.width; x += gridSize) {
-                for (let y = 0; y < canvas.height; y += gridSize) {
-                    ctx.fillStyle = "#ddd";
-                    ctx.fillRect(x, y, gridSize - 1, gridSize - 1);   
-                }
-            } 
-        }
-
-    function gameLoop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawGrid();
-    }
+    const video = document.getElementById('Video');
 
     document.addEventListener('mousemove', (e) => {
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
 
-            const rotateY = (mouseX - centerX) / 75;
-            const rotateX = -(mouseY - centerY) / 75;
+        const rotateY = (mouseX - centerX) / 75;
+        const rotateX = -(mouseY - centerY) / 75;
 
-            canvas.style.transform = `perspective(800px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
-        });
-
-    gameLoop();
+        video.style.transform = `perspective(800px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+    });
   </script>
 
   <script>
@@ -176,6 +171,23 @@
         card.style.transform = `rotateX(0deg) rotateY(0deg)`;
       });
     });
+
+    window.addEventListener("pageshow", (event) => {
+      // Reset video transform
+      const video = document.getElementById('Video');
+      if (video) {
+        video.style.transform = "translate(0,0) perspective(800px) rotateY(0deg) rotateX(0deg)";
+      }
+
+      // Reset all card transforms
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        card.style.transform = "rotateX(0deg) rotateY(0deg)";
+        card.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.25)';
+        card.style.filter = 'none';
+      });
+    });
+
 
     cards.forEach(card => {
     card.addEventListener('mouseenter', () => {

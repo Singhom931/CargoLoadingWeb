@@ -25,9 +25,19 @@
             z-index: -1;
         }
 
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;     /* ensures it fills without distortion */
+            z-index: -1;
+        }
+
         .login-container {
             z-index: 1;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(15px);
             padding: 30px;
             border-radius: 15px;
@@ -41,7 +51,7 @@
         h1 {
             font-size: 2.5em;
             margin-bottom: 20px;
-            background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+            background: #7567f7;/*linear-gradient(90deg, #5395eb, #56a7f3, #75bbfd);*/
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -74,8 +84,9 @@
             margin: 20px 0;
             border: none;
             border-radius: 8px;
-            background: linear-gradient(90deg, #c316da, #e0109b, #bd1df2);
+            background: linear-gradient(90deg, #5395eb, #56a7f3, #75bbfd);
             color: white;
+            opacity: 10;
             font-size: 1.2em;
             font-weight: bold;
             cursor: pointer;
@@ -83,11 +94,11 @@
         }
 
         button:hover {
-            background: linear-gradient(90deg, #e0109b, #c316da, #e0109b);
+            background: linear-gradient(90deg, #3e88e9, #1182ec, #3e88e9);
         }
 
         a {
-            color: #fbc531;
+            color: #bb31fb;
             text-decoration: none;
             font-size: 1em;
         }
@@ -120,7 +131,9 @@
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
+    <!-- <canvas id="gameCanvas"> </canvas> -->
+    <video autoplay muted loop src="{{ url_for('static', filename='resources/background.mp4') }}" type="video/mp4"> </video>
+    
     <div class="login-container">
         <h1>Welcome Back!</h1>
         <form id="login-form" method="POST">
@@ -130,265 +143,7 @@
         </form>
         <a href="register">Create Account</a> | <a href="/guest">Continue as Guest</a>
     </div>
-    <button id="playBtn">Play</button>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // Game settings
-        const gridSize = 30; // Size of each cell
-        let lastSnake = [];
-        let lastMoveTime = Date.now();
-        let moveInterval = 150; // in ms
-
-        let snake = [{ x: 5, y: 5 }];
-        let direction = { x: 0, y: 0 };
-        let cargo = spawnCargo();
-        let score = 0;
-        let speed = 10;
-        let isPlaying = false;
-        let gameInterval;
-
-        function spawnCargo() {
-            let newCargo;
-            do {
-                newCargo = {
-                    x: Math.floor(Math.random() * canvas.width / gridSize),
-                    y: Math.floor(Math.random() * canvas.height / gridSize),
-                };
-            } while (isCargoOnSnake(newCargo));
-            return newCargo;
-        }
-
-        function isCargoOnSnake(cargo) {
-            return snake.some(segment => segment.x === cargo.x && segment.y === cargo.y);
-        }
-
-        function drawGrid() {
-            ctx.fillStyle = "#eeeeee";
-            for (let x = 0; x < canvas.width; x += gridSize) {
-                for (let y = 0; y < canvas.height; y += gridSize) {
-                    ctx.fillRect(x, y, gridSize - 1, gridSize - 1);
-                }
-            }
-        }
-
-        function drawSnake() {
-            let now = Date.now();
-            let progress = Math.min((now - lastMoveTime) / moveInterval, 1);
-
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-            ctx.shadowBlur = 4;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
-
-            snake.forEach((segment, i) => {
-                let prev = lastSnake[i] || segment;
-
-                let interpX = prev.x + (segment.x - prev.x) * progress;
-                let interpY = prev.y + (segment.y - prev.y) * progress;
-
-                ctx.fillStyle = i === 0 ? "#357a38" : "#4caf50";
-                ctx.fillRect(interpX * gridSize, interpY * gridSize, gridSize - 1, gridSize - 1);
-            });
-
-            ctx.shadowBlur = 0;
-        }
-
-        function drawCargo() {
-            const x = cargo.x * gridSize;
-            const y = cargo.y * gridSize;
-
-            ctx.save();
-            ctx.translate(x + gridSize / 2, y + gridSize / 2);
-            ctx.rotate(Math.sin(Date.now() / 200) * 0.1); // Slight rotation effect
-            ctx.scale(1.1, 1.1);
-
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-            ctx.shadowBlur = 6;
-            ctx.shadowOffsetX = 3;
-            ctx.shadowOffsetY = 3;
-
-            ctx.fillStyle = "#ff5722";
-            ctx.fillRect(-gridSize / 2, -gridSize / 2, gridSize - 1, gridSize - 1);
-            ctx.restore();
-        }
-
-
-        function drawScore() {
-            ctx.fillStyle = "#000";
-            ctx.font = "24px Arial";
-            ctx.fillText("Score: " + score, 20, 30);
-        }
-
-        function updateSnake() {
-            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
-            // Check for collisions with walls
-            if (head.x < 0 || head.x >= canvas.width / gridSize || head.y < 0 || head.y >= canvas.height / gridSize) {
-                score = 0;
-                resetGame(); // Restart if it hits the wall
-                return;
-            }
-
-            // Check if snake runs into itself
-            for (let i = 1; i < snake.length; i++) {
-                if (snake[i].x === head.x && snake[i].y === head.y) {
-                    score = 0;
-                    resetGame(); // Restart if snake bites itself
-                    return;
-                }
-            }
-
-            // Add new head position
-            snake.unshift(head);
-
-            // Check if the snake ate the cargo
-            if (head.x === cargo.x && head.y === cargo.y) {
-                score++;
-                cargo = spawnCargo(); // Spawn new cargo
-            } else {
-                snake.pop(); // Remove the tail
-            }
-        }
-
-        function findSafeDirection() {
-            const head = snake[0];
-            const body = new Set();
-            snake.forEach((segment, index) => {
-                if (index !== 0) { // Do not treat the head as part of the body
-                    body.add(`${segment.x},${segment.y}`);
-                }
-            });
-
-            const directions = [
-                { x: 1, y: 0 }, // Right
-                { x: -1, y: 0 }, // Left
-                { x: 0, y: 1 }, // Down
-                { x: 0, y: -1 } // Up
-            ];
-
-            // Use BFS to find the shortest path to the cargo
-            let queue = [{ x: head.x, y: head.y, path: [] }];
-            let visited = new Set();
-            visited.add(`${head.x},${head.y}`);
-
-            while (queue.length > 0) {
-                const { x, y, path } = queue.shift();
-
-                // If we've reached the cargo, return the path
-                if (x === cargo.x && y === cargo.y) {
-                    return path[0]; // Return the next move in the path
-                }
-
-                for (let direction of directions) {
-                    let newX = x + direction.x;
-                    let newY = y + direction.y;
-
-                    // Avoid out of bounds and self-collision
-                    if (newX >= 0 && newY >= 0 && newX < canvas.width / gridSize && newY < canvas.height / gridSize &&
-                        !visited.has(`${newX},${newY}`) && !body.has(`${newX},${newY}`)) {
-                        
-                        visited.add(`${newX},${newY}`);
-                        queue.push({ x: newX, y: newY, path: [...path, direction] });
-                    }
-                }
-            }
-
-            // Default: if no path found, move right
-            return { x: 1, y: 0 }; 
-        }
-
-        function findDirection() {
-            const move = findSafeDirection();
-            direction = move;
-        }
-
-        function resetGame() {
-            snake = [{ x: 5, y: 5 }];
-            direction = { x: 0, y: 0 };
-            cargo = spawnCargo();
-        }
-
-        function handleKeyDown(event) {
-            if (event.key === "ArrowUp" && !(direction.x === 0 && direction.y === 1)){direction = { x: 0, y: -1 };}
-            if (event.key === "ArrowDown" && !(direction.x === 0 && direction.y === -1)) direction = { x: 0, y: 1 };
-            if (event.key === "ArrowLeft" && !(direction.x === 1 && direction.y === 0)) direction = { x: -1, y: 0 };
-            if (event.key === "ArrowRight" && !(direction.x === -1 && direction.y === 0)) direction = { x: 1, y: 0 };
-        }
-
-        document.getElementById("playBtn").addEventListener("click", function() {
-            if (!isPlaying) {
-                isPlaying = true;
-                speed = 100;
-                document.getElementById("playBtn").textContent = "Stop";
-                document.querySelector(".login-container").style.display = "none";
-                startManualMode();
-            } else {
-                isPlaying = false;
-                speed = 10;
-                document.getElementById("playBtn").textContent = "Play";
-                document.querySelector(".login-container").style.display = "block";
-                stopManualMode();
-            }
-        });
-
-        function startManualMode() {
-            document.addEventListener("keydown", handleKeyDown);
-            resetGame()
-            //manualGameLoop();
-        }
-
-        function stopManualMode() {
-            document.removeEventListener("keydown", handleKeyDown);
-            resetGame();
-            //gameLoop();
-        }
-
-        function updateSnakeAndTime() {
-            lastSnake = snake.map(s => ({ ...s }));
-            lastMoveTime = Date.now();
-            updateSnake(); // your existing movement logic
-        }
-
-        function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawGrid();
-            drawSnake();
-            drawCargo();
-            drawScore();
-            if (!isPlaying){
-            findDirection(); // Calculate next direction
-            }
-            // updateSnake();
-            updateSnakeAndTime();
-            setTimeout(gameLoop, speed);
-            //requestAnimationFrame(gameLoop);
-        }
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-
-            const rotateY = (mouseX - centerX) / 100;
-            const rotateX = -(mouseY - centerY) / 100;
-
-            canvas.style.transform = `perspective(800px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
-        });
-
-
-        gameLoop();
-    </script>
     <script>
         const card = document.querySelector('.login-container');
         const playBtn = document.getElementById('playBtn');

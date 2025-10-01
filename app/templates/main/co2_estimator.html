@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Truck CO₂ Estimator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #e0eafc, #cfdef3);
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffffdd;
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+  }
+
+  .container:hover {
+    box-shadow: 0 12px 36px rgba(0,0,0,0.25);
+  }
+
+  .input-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .input-group label {
+    flex: 1 1 200px;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+
+  .input-group input, .input-group select {
+    flex: 1 1 200px;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .input-group input:focus, .input-group select:focus {
+    border-color: #2575fc;
+    box-shadow: 0 0 6px rgba(37, 117, 252, 0.4);
+    outline: none;
+  }
+
+  button {
+    background: linear-gradient(90deg, #6a11cb, #7914e6);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  #results {
+    margin-top: 30px;
+  }
+
+  #results h2 {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #2575fc;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  table th, table td {
+    padding: 12px 15px;
+    text-align: center;
+  }
+
+  table th {
+    background: linear-gradient(90deg, #6a11cb, #7a14e7, #7a14e7, #7a14e7, #7a14e7, #7a14e7, #6a11cb);
+    color: white;
+    font-weight: 500;
+  }
+
+  table tr:nth-child(even) td {
+    background: #f0f4f8;
+  }
+
+  table tr:nth-child(odd) td {
+    background: #ffffff;
+  }
+
+  table td {
+    font-weight: 500;
+    color: #333;
+  }
+
+  p.result-summary {
+    margin-top: 15px;
+    font-weight: 600;
+    text-align: center;
+    font-size: 1rem;
+    color: #6a11cb;
+  }
+
+  @media (max-width: 600px) {
+    .input-group {
+      flex-direction: column;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Truck Container CO₂ Estimator</h1>
+
+<div class="container">
+  <div class="input-group">
+    <label for="distance">Distance (km)</label>
+    <input type="number" id="distance" placeholder="Enter distance" min="1" required>
+    
+    <label for="weight">Cargo Weight (tons)</label>
+    <input type="number" id="weight" placeholder="Enter cargo weight" min="0" max="40" step="0.1" required>
+  </div>
+
+  <div class="input-group">
+    <label for="truckType">Truck Type</label>
+    <select id="truckType">
+      <option value="Light">Light Truck</option>
+      <option value="Medium">Medium Truck</option>
+      <option value="Heavy">Heavy / Semi-trailer</option>
+    </select>
+
+    <label for="fuelType">Fuel Type</label>
+    <select id="fuelType">
+      <option value="Diesel">Diesel</option>
+      <option value="Gasoline">Gasoline</option>
+      <option value="LNG">LNG</option>
+      <option value="Biofuel">Biofuel</option>
+    </select>
+
+    <label for="engineCondition">Engine Condition</label>
+    <select id="engineCondition">
+      <option value="Good">Good</option>
+      <option value="Average">Average</option>
+      <option value="Poor">Poor</option>
+    </select>
+  </div>
+
+  <div class="input-group">
+    <label for="trafficFactor">Traffic Slowdown (%)</label>
+    <input type="number" id="trafficFactor" placeholder="e.g., 20 for 20% slower" min="0" max="100" step="1">
+  </div>
+
+  <button onclick="calculateCO2()">Calculate CO₂ Emissions</button>
+
+  <div id="results"></div>
+</div>
+
+<script>
+function calculateCO2() {
+  const distance = parseFloat(document.getElementById('distance').value);
+  const weight = parseFloat(document.getElementById('weight').value);
+  const truckType = document.getElementById('truckType').value;
+  const fuelType = document.getElementById('fuelType').value;
+  const engineCondition = document.getElementById('engineCondition').value;
+  const trafficInput = parseFloat(document.getElementById('trafficFactor').value) || 0;
+
+  if (distance <= 0 || weight < 0) {
+    alert("Please enter valid distance and cargo weight.");
+    return;
+  }
+
+  // Base fuel consumption in L/100km
+  const baseFuelPer100km = { 'Light': 20, 'Medium': 35, 'Heavy': 50 };
+  const fuelCO2 = { 'Diesel': 2.68, 'Gasoline': 2.31, 'LNG': 2.75, 'Biofuel': 1.2 }; // kg CO2 per liter
+  const engineFactor = { 'Good': 1.0, 'Average': 1.1, 'Poor': 1.25 };
+  const maxWeight = 40; // tons
+
+  const baseFuelPerKm = baseFuelPer100km[truckType] / 100; // L/km
+  const weightFactor = 1 + (weight / maxWeight) * 0.5; // realistic load effect
+  const engine = engineFactor[engineCondition];
+
+  const trafficFactor = 1 + (trafficInput / 100); // speed reduction increases fuel use
+
+  const totalFuel = distance * baseFuelPerKm * weightFactor * engine * trafficFactor;
+  const totalCO2 = totalFuel * fuelCO2[fuelType];
+
+  // Generate results table
+  let html = `<h2>Estimated CO₂ Emissions</h2>`;
+  html += `<table><tr><th>Traffic Slowdown (%)</th><th>Engine: Good</th><th>Engine: Average</th><th>Engine: Poor</th></tr>`;
+  
+  for (let tf = 0; tf <= 50; tf += 5) { // realistic traffic variation 0–50%
+    const tfFactor = 1 + (tf / 100);
+    const good = (distance * baseFuelPerKm * weightFactor * engineFactor['Good'] * tfFactor * fuelCO2[fuelType]).toFixed(2);
+    const avg = (distance * baseFuelPerKm * weightFactor * engineFactor['Average'] * tfFactor * fuelCO2[fuelType]).toFixed(2);
+    const poor = (distance * baseFuelPerKm * weightFactor * engineFactor['Poor'] * tfFactor * fuelCO2[fuelType]).toFixed(2);
+    html += `<tr><td>${tf}%</td><td>${good}</td><td>${avg}</td><td>${poor}</td></tr>`;
+  }
+
+  html += `</table>`;
+  html += `<p><strong>Total CO₂ for entered traffic (${trafficInput}%) and engine (${engineCondition}):</strong> ${totalCO2.toFixed(2)} kg</p>`;
+  document.getElementById('results').innerHTML = html;
+}
+</script>
+
+</body>
+</html>
